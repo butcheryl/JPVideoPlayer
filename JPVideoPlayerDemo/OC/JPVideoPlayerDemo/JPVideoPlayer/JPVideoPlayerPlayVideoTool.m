@@ -9,140 +9,17 @@
  * or http://www.jianshu.com/users/e2f2d779c022/latest_articles to contact me.
  */
 
-
 #import "JPVideoPlayerPlayVideoTool.h"
-#import "JPVideoPlayerResourceLoader.h"
-#import "UIView+PlayerStatusAndDownloadIndicator.h"
-#import "JPVideoPlayerDownloaderOperation.h"
+#import "JPVideoPlayerPlayVideoToolItem.h"
 #import "JPVideoPlayerCompat.h"
+#import "JPVideoPlayerResourceLoader.h"
+#import "JPVideoPlayerDownloaderOperation.h"
 
 CGFloat const JPVideoPlayerLayerFrameY = 2;
 
-@interface JPVideoPlayerPlayVideoToolItem()
-
-/** 
- * The playing URL
- */
-@property(nonatomic, strong, nullable)NSURL *url;
-
-/**
- * The Player to play video.
- */
-@property(nonatomic, strong, nullable)AVPlayer *player;
-
-/**
- * The current player's layer.
- */
-@property(nonatomic, strong, nullable)AVPlayerLayer *currentPlayerLayer;
-
-/**
- * The background layer for video layer.
- */
-@property(nonatomic, strong, nullable)CALayer *backgroundLayer;
-
-/**
- * The current player's item.
- */
-@property(nonatomic, strong, nullable)AVPlayerItem *currentPlayerItem;
-
-/**
- * The current player's urlAsset.
- */
-@property(nonatomic, strong, nullable)AVURLAsset *videoURLAsset;
-
-/**
- * The view of the video picture will show on.
- */
-@property(nonatomic, weak, nullable)UIView *unownShowView;
-
-/**
- * A flag to book is cancel play or not.
- */
-@property(nonatomic, assign, getter=isCancelled)BOOL cancelled;
-
-/**
- * Error message.
- */
-@property(nonatomic, strong, nullable)JPVideoPlayerPlayVideoToolErrorBlock error;
-
-/**
- * The resourceLoader for the videoPlayer.
- */
-@property(nonatomic, strong, nullable)JPVideoPlayerResourceLoader *resourceLoader;
-
-/**
- * options
- */
-@property(nonatomic, assign)JPVideoPlayerOptions playerOptions;
-
-/**
- * The current playing url key.
- */
-@property(nonatomic, strong, nonnull)NSString *playingKey;
-
-/**
- * The last play time for player.
- */
-@property(nonatomic, assign)NSTimeInterval lastTime;
-
-@end
-
-#define JPLog(FORMAT, ...); fprintf(stderr,"%s\n",[[NSString stringWithFormat:FORMAT, ##__VA_ARGS__] UTF8String]);
 static NSString *JPVideoPlayerURLScheme = @"SystemCannotRecognition";
+
 static NSString *JPVideoPlayerURL = @"www.newpan.com";
-@implementation JPVideoPlayerPlayVideoToolItem
-
--(void)stopPlayVideo{
-    
-    self.cancelled = YES;
-    
-    [self.unownShowView hideProgressView];
-    [self.unownShowView hideActivityIndicatorView];
-    
-    [self reset];
-}
-
--(void)pausePlayVideo{
-    [self.player pause];
-}
-
--(void)resumePlayVideo{
-    [self.player play];
-}
-
--(void)reset{
-    // remove video layer from superlayer.
-    if (self.backgroundLayer.superlayer) {
-        [self.currentPlayerLayer removeFromSuperlayer];
-        [self.backgroundLayer removeFromSuperlayer];
-    }
-    
-    // remove observe.
-    JPVideoPlayerPlayVideoTool *tool = [JPVideoPlayerPlayVideoTool sharedTool];
-    [_currentPlayerItem removeObserver:tool forKeyPath:@"status"];
-    [_currentPlayerItem removeObserver:tool forKeyPath:@"loadedTimeRanges"];
-    
-    // remove player
-    [self.player pause];
-    [self.player cancelPendingPrerolls];
-    self.player = nil;
-    [self.videoURLAsset.resourceLoader setDelegate:nil queue:dispatch_get_main_queue()];
-    self.currentPlayerItem = nil;
-    self.currentPlayerLayer = nil;
-    self.videoURLAsset = nil;
-    self.resourceLoader = nil;
-}
-
--(CALayer *)backgroundLayer{
-    if (!_backgroundLayer) {
-        _backgroundLayer = [CALayer new];
-        _backgroundLayer.backgroundColor = [UIColor blackColor].CGColor;
-    }
-    return _backgroundLayer;
-}
-
-@end
-
 
 @interface JPVideoPlayerPlayVideoTool()
 
@@ -174,7 +51,7 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
 #pragma mark -----------------------------------------
 #pragma mark Public
 
--(nullable JPVideoPlayerPlayVideoToolItem *)playExistedVideoWithURL:(NSURL * _Nullable)url fullVideoCachePath:(NSString * _Nullable)fullVideoCachePath options:(JPVideoPlayerOptions)options showOnView:(UIView * _Nullable)showView error:(nullable JPVideoPlayerPlayVideoToolErrorBlock)error{
+- (nullable JPVideoPlayerPlayVideoToolItem *)playExistedVideoWithURL:(NSURL * _Nullable)url fullVideoCachePath:(NSString * _Nullable)fullVideoCachePath options:(JPVideoPlayerOptions)options showOnView:(UIView * _Nullable)showView error:(nullable JPVideoPlayerPlayVideoToolErrorBlock)error{
     
     if (fullVideoCachePath.length==0) {
         if (error) error([NSError errorWithDomain:@"the file path is disable" code:0 userInfo:nil]);
@@ -231,7 +108,13 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
     return item;
 }
 
--(nullable JPVideoPlayerPlayVideoToolItem *)playVideoWithURL:(NSURL * _Nullable)url tempVideoCachePath:(NSString * _Nullable)tempVideoCachePath options:(JPVideoPlayerOptions)options videoFileExceptSize:(NSUInteger)exceptSize videoFileReceivedSize:(NSUInteger)receivedSize showOnView:(UIView * _Nullable)showView error:(nullable JPVideoPlayerPlayVideoToolErrorBlock)error{
+-(nullable JPVideoPlayerPlayVideoToolItem *)playVideoWithURL:(NSURL * _Nullable)url
+                                          tempVideoCachePath:(NSString * _Nullable)tempVideoCachePath
+                                                     options:(JPVideoPlayerOptions)options
+                                         videoFileExceptSize:(NSUInteger)exceptSize
+                                       videoFileReceivedSize:(NSUInteger)receivedSize
+                                                  showOnView:(UIView * _Nullable)showView
+                                                       error:(nullable JPVideoPlayerPlayVideoToolErrorBlock)error {
     
     if (tempVideoCachePath.length==0) {
         if (error) error([NSError errorWithDomain:@"the file path is disable" code:0 userInfo:nil]);
@@ -250,8 +133,10 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
     item.unownShowView = showView;
     JPVideoPlayerResourceLoader *resourceLoader = [JPVideoPlayerResourceLoader new];
     item.resourceLoader = resourceLoader;
+    
     AVURLAsset *videoURLAsset = [AVURLAsset URLAssetWithURL:[self handleVideoURL] options:nil];
     [videoURLAsset.resourceLoader setDelegate:resourceLoader queue:dispatch_get_main_queue()];
+    
     AVPlayerItem *playerItem = [AVPlayerItem playerItemWithAsset:videoURLAsset];
     {
         item.url = url;
@@ -290,6 +175,7 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
     @synchronized (self) {
         [self.playVideoItems addObject:item];
     }
+    
     self.currentPlayVideoItem = item;
     
     // play.
@@ -298,8 +184,11 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
     return item;
 }
 
--(void)didReceivedDataCacheInDiskByTempPath:(NSString * _Nonnull)tempCacheVideoPath videoFileExceptSize:(NSUInteger)expectedSize videoFileReceivedSize:(NSUInteger)receivedSize{
-    [self.currentPlayVideoItem.resourceLoader didReceivedDataCacheInDiskByTempPath:tempCacheVideoPath videoFileExceptSize:expectedSize videoFileReceivedSize:receivedSize];
+-(void)didReceivedDataCacheInDiskByTempPath:(NSString * _Nonnull)tempCacheVideoPath
+                        videoFileExceptSize:(NSUInteger)expectedSize
+                      videoFileReceivedSize:(NSUInteger)receivedSize {
+    [self.currentPlayVideoItem.resourceLoader didReceivedDataCacheInDiskByTempPath:tempCacheVideoPath
+                                                               videoFileExceptSize:expectedSize videoFileReceivedSize:receivedSize];
 }
 
 -(void)didCachedVideoDataFinishedFromWebFullVideoCachePath:(NSString * _Nullable)fullVideoCachePath{
@@ -314,9 +203,9 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
 
 -(void)stopPlay{
     self.currentPlayVideoItem = nil;
-    for (JPVideoPlayerPlayVideoToolItem *item in self.playVideoItems) {
-        [item stopPlayVideo];
-    }
+//    for (JPVideoPlayerPlayVideoToolItem *item in self.playVideoItems) {
+//        [item stopPlayVideo];
+//    }
     @synchronized (self) {
         if (self.playVideoItems)
             [self.playVideoItems removeAllObjects];
@@ -337,15 +226,15 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
 }
 
 -(void)appReceivedMemoryWarning{
-    [self.currentPlayVideoItem stopPlayVideo];
+//    [self.currentPlayVideoItem stopPlayVideo];
 }
 
 - (void)appDidEnterBackground{
-    [self.currentPlayVideoItem pausePlayVideo];
+//    [self.currentPlayVideoItem pausePlayVideo];
 }
 
 - (void)appDidEnterPlayGround{
-    [self.currentPlayVideoItem resumePlayVideo];
+//    [self.currentPlayVideoItem resumePlayVideo];
 }
 
 
@@ -387,14 +276,14 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
                 if (!self.currentPlayVideoItem) return;
                 
                 [self.currentPlayVideoItem.player play];
-                [self hideActivaityIndicatorView];
+//                [self hideActivaityIndicatorView];
                 
                 [self displayVideoPicturesOnShowLayer];
             }
                 break;
                 
             case AVPlayerItemStatusFailed:{
-                [self hideActivaityIndicatorView];
+//                [self hideActivaityIndicatorView];
                 
                 if (self.currentPlayVideoItem.error) self.currentPlayVideoItem.error([NSError errorWithDomain:@"Some errors happen on player" code:0 userInfo:nil]);
             }
@@ -411,11 +300,11 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
         // JPLog(@"%f", currentTime)
         
         if (currentTime != 0 && currentTime > self.currentPlayVideoItem.lastTime) {
-            [self hideActivaityIndicatorView];
+//            [self hideActivaityIndicatorView];
             self.currentPlayVideoItem.lastTime = currentTime;
         }
         else{
-            [self showActivaityIndicatorView];
+//            [self showActivaityIndicatorView];
         }
     }
 }
@@ -424,23 +313,23 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
 #pragma mark -----------------------------------------
 #pragma mark Private
 
--(void)startDownload{
-    [self showActivaityIndicatorView];
-}
-
--(void)finishedDownload{
-    [self hideActivaityIndicatorView];
-}
-
--(void)showActivaityIndicatorView{
-    if (self.currentPlayVideoItem.playerOptions&JPVideoPlayerShowActivityIndicatorView)
-        [self.currentPlayVideoItem.unownShowView showActivityIndicatorView];
-}
-
--(void)hideActivaityIndicatorView{
-    if (self.currentPlayVideoItem.playerOptions&JPVideoPlayerShowActivityIndicatorView)
-        [self.currentPlayVideoItem.unownShowView hideActivityIndicatorView];
-}
+//-(void)startDownload{
+//    [self showActivaityIndicatorView];
+//}
+//
+//-(void)finishedDownload{
+//    [self hideActivaityIndicatorView];
+//}
+//
+//-(void)showActivaityIndicatorView{
+//    if (self.currentPlayVideoItem.playerOptions&JPVideoPlayerShowActivityIndicatorView)
+//        [self.currentPlayVideoItem.unownShowView showActivityIndicatorView];
+//}
+//
+//-(void)hideActivaityIndicatorView{
+//    if (self.currentPlayVideoItem.playerOptions&JPVideoPlayerShowActivityIndicatorView)
+//        [self.currentPlayVideoItem.unownShowView hideActivityIndicatorView];
+//}
 
 -(void)setCurrentPlayVideoItem:(JPVideoPlayerPlayVideoToolItem *)currentPlayVideoItem{
     [self willChangeValueForKey:@"currentPlayVideoItem"];
@@ -458,7 +347,7 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
     if (!self.currentPlayVideoItem.isCancelled) {
         // fixed #26.
         [self.currentPlayVideoItem.backgroundLayer addSublayer:self.currentPlayVideoItem.currentPlayerLayer];
-        [self.currentPlayVideoItem.unownShowView.videoLayerView.layer addSublayer:self.currentPlayVideoItem.backgroundLayer];
+//        [self.currentPlayVideoItem.unownShowView.videoLayerView.layer addSublayer:self.currentPlayVideoItem.backgroundLayer];
     }
 }
 

@@ -9,40 +9,11 @@
  * or http://www.jianshu.com/users/e2f2d779c022/latest_articles to contact me.
  */
 
-
 #import <Foundation/Foundation.h>
 #import "JPVideoPlayerCompat.h"
+#import "JPVideoPlayerDefine.h"
 
 @class JPVideoPlayerCacheConfig;
-
-typedef NS_ENUM(NSInteger, JPVideoPlayerCacheType) {
-   
-    /**
-     * The video wasn't available the JPVideoPlayer caches, but was downloaded from the web.
-     */
-    JPVideoPlayerCacheTypeNone,
-    
-    /**
-     * The video was obtained from the disk cache.
-     */
-    JPVideoPlayerCacheTypeDisk,
-    
-    /**
-     * The video was obtained from local file.
-     */
-    JPVideoPlayerCacheTypeLocation
-};
-
-typedef void(^JPVideoPlayerCacheQueryCompletedBlock)(NSString * _Nullable videoPath, JPVideoPlayerCacheType cacheType);
-
-typedef void(^JPVideoPlayerCheckCacheCompletionBlock)(BOOL isInDiskCache);
-
-typedef void(^JPVideoPlayerCalculateSizeBlock)(NSUInteger fileCount, NSUInteger totalSize);
-
-typedef void(^JPVideoPlayerNoParamsBlock)();
-
-typedef void(^JPVideoPlayerStoreDataFinishedBlock)(NSUInteger storedSize, NSError * _Nullable error, NSString * _Nullable fullVideoCachePath);
-
 
 @interface JPVideoPlayerCacheToken : NSObject
 
@@ -122,9 +93,9 @@ typedef void(^JPVideoPlayerStoreDataFinishedBlock)(NSUInteger storedSize, NSErro
  *
  * @param fullVideoCachePath the path need to check in disk.
  *
- * @return if the file is existed for given video path, return YES, return NO, otherwise. 
+ * @return if the file is existed for given video path, return YES, return NO, otherwise.
  */
--(BOOL)diskVideoExistsWithPath:(NSString * _Nullable)fullVideoCachePath;
+- (BOOL)diskVideoExistsWithPath:(NSString * _Nullable)fullVideoCachePath;
 
 
 # pragma - Clear Cache Events
@@ -143,7 +114,7 @@ typedef void(^JPVideoPlayerStoreDataFinishedBlock)(NSUInteger storedSize, NSErro
  * @param key  The unique flag for the given url in this framework.
  * @param completion      A block that should be executed after the video has been removed (optional).
  */
--(void)removeTempCacheForKey:(NSString * _Nonnull)key withCompletion:(nullable JPVideoPlayerNoParamsBlock)completion;
+- (void)removeTempCacheForKey:(NSString * _Nonnull)key withCompletion:(nullable JPVideoPlayerNoParamsBlock)completion;
 
 /**
  * Async remove all expired cached video from disk. Non-blocking method - returns immediately.
@@ -174,14 +145,14 @@ typedef void(^JPVideoPlayerStoreDataFinishedBlock)(NSUInteger storedSize, NSErro
  *
  * @return if the disk have enough size to cache the given size file, return YES, return NO otherwise.
  */
--(BOOL)haveFreeSizeToCacheFileWithSize:(NSUInteger)fileSize;
+- (BOOL)haveFreeSizeToCacheFileWithSize:(NSUInteger)fileSize;
 
 /**
  * Get the free size of device.
  *
  * @return the free size of device.
  */
--(unsigned long long)getDiskFreeSize;
+- (unsigned long long)getDiskFreeSize;
 
 /**
  * Get the size used by the disk cache, synchronously.

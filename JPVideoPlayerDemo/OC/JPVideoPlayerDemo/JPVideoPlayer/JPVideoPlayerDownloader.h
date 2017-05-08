@@ -140,7 +140,10 @@ typedef JPHTTPHeadersDictionary * _Nullable (^JPVideoPlayerDownloaderHeadersFilt
  *
  * @return A token (@see JPVideoPlayerDownloadToken) that can be passed to -cancel: to cancel this operation.
  */
-- (nullable JPVideoPlayerDownloadToken *)downloadVideoWithURL:(nullable NSURL *)url options:(JPVideoPlayerDownloaderOptions)options progress:(nullable JPVideoPlayerDownloaderProgressBlock)progressBlock completed:(nullable JPVideoPlayerDownloaderErrorBlock)errorBlock;
+- (nullable JPVideoPlayerDownloadToken *)downloadVideoWithURL:(nullable NSURL *)url
+                                                      options:(JPVideoPlayerDownloaderOptions)options
+                                                     progress:(nullable JPVideoPlayerDownloaderProgressBlock)progressBlock
+                                                    completed:(nullable JPVideoPlayerDownloaderErrorBlock)errorBlock;
 
 /**
  * Cancels a download that was previously queued using -downloadVideoWithURL:options:progress:completed:

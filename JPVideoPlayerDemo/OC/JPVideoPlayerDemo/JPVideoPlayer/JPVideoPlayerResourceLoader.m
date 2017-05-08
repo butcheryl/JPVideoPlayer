@@ -19,26 +19,27 @@
  * The request queues.
  * It save the requests waiting for being given video data.
  */
-@property (nonatomic, strong, nullable)NSMutableArray *pendingRequests;
+@property (nonatomic, strong, nullable) NSMutableArray *pendingRequests;
 
 /**
  * The video data total length.
  */
-@property(nonatomic, assign)NSUInteger expectedSize;
+@property(nonatomic, assign) NSUInteger expectedSize;
 
 /**
  * The video data cached in disk.
  */
-@property(nonatomic, assign)NSUInteger receivedSize;
+@property(nonatomic, assign) NSUInteger receivedSize;
 
 /**
  * The cache video data temporary cache path in disk.
  */
-@property(nonatomic, strong, nullable)NSString *tempCacheVideoPath;
+@property(nonatomic, strong, nullable) NSString *tempCacheVideoPath;
 
 @end
 
 static NSString *JPVideoPlayerMimeType = @"video/mp4";
+
 @implementation JPVideoPlayerResourceLoader
 
 -(instancetype)init{
@@ -53,7 +54,10 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
 #pragma mark -----------------------------------------
 #pragma mark Public
 
--(void)didReceivedDataCacheInDiskByTempPath:(NSString * _Nonnull)tempCacheVideoPath videoFileExceptSize:(NSUInteger)expectedSize videoFileReceivedSize:(NSUInteger)receivedSize{
+-(void)didReceivedDataCacheInDiskByTempPath:(NSString * _Nonnull)tempCacheVideoPath
+                        videoFileExceptSize:(NSUInteger)expectedSize
+                      videoFileReceivedSize:(NSUInteger)receivedSize {
+    
     self.tempCacheVideoPath = tempCacheVideoPath;
     self.expectedSize = expectedSize;
     self.receivedSize = receivedSize;
@@ -61,7 +65,7 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
     [self internalPendingRequests];
 }
 
--(void)didCachedVideoDataFinishedFromWebFullVideoCachePath:(NSString * _Nullable)fullVideoCachePath{
+-(void)didCachedVideoDataFinishedFromWebFullVideoCachePath:(NSString * _Nullable)fullVideoCachePath {
     self.tempCacheVideoPath = fullVideoCachePath;
     self.receivedSize = self.expectedSize;
     [self internalPendingRequests];
@@ -71,7 +75,7 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
 #pragma mark -----------------------------------------
 #pragma mark AVAssetResourceLoaderDelegate
 
--(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest{
+-(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest {
     if (resourceLoader && loadingRequest){
         [self.pendingRequests addObject:loadingRequest];
         [self internalPendingRequests];
@@ -79,7 +83,7 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
     return YES;
 }
 
--(void)resourceLoader:(AVAssetResourceLoader *)resourceLoader didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest{
+-(void)resourceLoader:(AVAssetResourceLoader *)resourceLoader didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
     [self.pendingRequests removeObject:loadingRequest];
 }
 
@@ -128,7 +132,7 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
     startOffset = MAX(0, startOffset);
     
     // Don't have any data at all for this reques
-    if (self.receivedSize<startOffset) {
+    if (self.receivedSize < startOffset) {
         return NO;
     }
     

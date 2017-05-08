@@ -13,19 +13,14 @@
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 #import "JPVideoPlayerManager.h"
+#import "JPVideoPlayerDefine.h"
 
 extern CGFloat const JPVideoPlayerLayerFrameY;
 
-@interface JPVideoPlayerPlayVideoToolItem : NSObject
 
-/** 
- * The current playing url key.
- */
-@property(nonatomic, strong, readonly, nonnull)NSString *playingKey;
-
-@end
 
 @class JPVideoPlayerPlayVideoTool;
+@class JPVideoPlayerPlayVideoToolItem;
 
 @protocol JPVideoPlayerPlayVideoToolDelegate <NSObject>
 
@@ -42,8 +37,6 @@ extern CGFloat const JPVideoPlayerLayerFrameY;
 -(BOOL)playVideoTool:(nonnull JPVideoPlayerPlayVideoTool *)videoTool shouldAutoReplayVideoForURL:(nonnull NSURL *)videoURL;
 
 @end
-
-typedef void(^JPVideoPlayerPlayVideoToolErrorBlock)(NSError * _Nullable error);
 
 @interface JPVideoPlayerPlayVideoTool : NSObject
 

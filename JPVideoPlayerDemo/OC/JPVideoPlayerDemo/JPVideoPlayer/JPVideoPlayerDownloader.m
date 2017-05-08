@@ -97,7 +97,10 @@
     return instance;
 }
 
-- (nullable JPVideoPlayerDownloadToken *)downloadVideoWithURL:(NSURL *)url options:(JPVideoPlayerDownloaderOptions)options progress:(JPVideoPlayerDownloaderProgressBlock)progressBlock completed:(JPVideoPlayerDownloaderErrorBlock)errorBlock{
+- (nullable JPVideoPlayerDownloadToken *)downloadVideoWithURL:(NSURL *)url
+                                                      options:(JPVideoPlayerDownloaderOptions)options
+                                                     progress:(JPVideoPlayerDownloaderProgressBlock)progressBlock
+                                                    completed:(JPVideoPlayerDownloaderErrorBlock)errorBlock {
     
     __weak typeof(self) weakSelf = self;
     
@@ -135,7 +138,7 @@
     }];
 }
 
--(void)cancel:(JPVideoPlayerDownloadToken *)token{
+- (void)cancel:(JPVideoPlayerDownloadToken *)token{
     dispatch_barrier_async(self.barrierQueue, ^{
         JPVideoPlayerDownloaderOperation *operation = self.URLOperations[token.url];
         BOOL canceled = [operation cancel:token.downloadOperationCancelToken];

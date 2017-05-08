@@ -13,11 +13,11 @@
 #import "JPVideoPlayerManager.h"
 #import "JPVideoPlayerCompat.h"
 #import "JPVideoPlayerCachePathTool.h"
-#import "JPVideoPlayerPlayVideoTool.h"
 #import "JPVideoPlayerDownloaderOperation.h"
-#import "UIView+WebVideoCacheOperation.h"
-#import "UIView+PlayerStatusAndDownloadIndicator.h"
-#import "UIView+WebVideoCache.h"
+#import "JPVideoPlayerPlayVideoTool.h"
+#import "JPVideoPlayerPlayVideoToolItem.h"
+//#import "UIView+PlayerStatusAndDownloadIndicator.h"
+//#import "UIView+WebVideoCache.h"
 
 @interface JPVideoPlayerCombinedOperation : NSObject <JPVideoPlayerOperation>
 
@@ -58,7 +58,7 @@
 @end
 
 
-@interface JPVideoPlayerManager()<JPVideoPlayerPlayVideoToolDelegate>
+@interface JPVideoPlayerManager()
 
 @property (strong, nonatomic, readwrite, nonnull) JPVideoPlayerCache *videoCache;
 
@@ -159,7 +159,7 @@
                     completedBlock(nil, error, JPVideoPlayerCacheTypeLocation, url);
                 }
             }];
-            [JPVideoPlayerPlayVideoTool sharedTool].delegate = self;
+//            [JPVideoPlayerPlayVideoTool sharedTool].delegate = self;
         }
         else{
             [self callCompletionBlockForOperation:operation completion:completedBlock videoPath:nil error:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorFileDoesNotExist userInfo:nil] cacheType:JPVideoPlayerCacheTypeNone url:url];
@@ -212,7 +212,7 @@
                                 }
                                 
                                 // refresh progress view.
-                                [self progressRefreshWithURL:targetURL options:options receiveSize:storedSize exceptSize:expectedSize];
+//                                [self progressRefreshWithURL:targetURL options:options receiveSize:storedSize exceptSize:expectedSize];
                                 
                                 { // play video from web.
                                     if (![JPVideoPlayerPlayVideoTool sharedTool].currentPlayVideoItem) {
@@ -225,7 +225,7 @@
                                                 }
                                             }
                                         }];
-                                        [JPVideoPlayerPlayVideoTool sharedTool].delegate = self;
+//                                        [JPVideoPlayerPlayVideoTool sharedTool].delegate = self;
                                     }
                                     else{
                                         NSString *key = [[JPVideoPlayerManager sharedManager] cacheKeyForURL:targetURL];
@@ -241,7 +241,7 @@
                                 [self callCompletionBlockForOperation:strongOperation completion:completedBlock videoPath:fullVideoCachePath error:nil cacheType:JPVideoPlayerCacheTypeNone url:url];
                                 
                                 // hide progress view.
-                                [self hideAllIndicatorViewWithURL:url options:options];
+//                                [self hideAllIndicatorViewWithURL:url options:options];
                                 [self safelyRemoveOperationFromRunning:strongOperation];
                             }
                         }
@@ -250,7 +250,7 @@
                             [self callCompletionBlockForOperation:strongOperation completion:completedBlock videoPath:nil error:error cacheType:JPVideoPlayerCacheTypeNone url:url];
                             
                             // hide indicator view.
-                            [self hideAllIndicatorViewWithURL:url options:options];
+//                            [self hideAllIndicatorViewWithURL:url options:options];
                             [self safelyRemoveOperationFromRunning:strongOperation];
                         }
                     }];
@@ -300,7 +300,7 @@
                         [[JPVideoPlayerManager sharedManager] stopPlay];
                         
                         // hide indicator view.
-                        [self hideAllIndicatorViewWithURL:url options:options];
+//                        [self hideAllIndicatorViewWithURL:url options:options];
                         
                         __strong __typeof(weakOperation) strongOperation = weakOperation;
                         [self safelyRemoveOperationFromRunning:strongOperation];
@@ -318,7 +318,7 @@
                             completedBlock(nil, error, JPVideoPlayerCacheTypeDisk, url);
                         }
                     }];
-                    [JPVideoPlayerPlayVideoTool sharedTool].delegate = self;
+//                    [JPVideoPlayerPlayVideoTool sharedTool].delegate = self;
                 }
                 
                 [self callCompletionBlockForOperation:strongOperation completion:completedBlock videoPath:videoPath error:nil cacheType:JPVideoPlayerCacheTypeDisk url:url];
@@ -330,7 +330,7 @@
                 [self callCompletionBlockForOperation:strongOperation completion:completedBlock videoPath:nil error:nil cacheType:JPVideoPlayerCacheTypeNone url:url];
                 [self safelyRemoveOperationFromRunning:operation];
                 // hide indicator view.
-                [self hideAllIndicatorViewWithURL:url options:options];
+//                [self hideAllIndicatorViewWithURL:url options:options];
             }
         }];
     }
@@ -355,16 +355,6 @@
 
 -(void)stopPlay{
     dispatch_main_async_safe(^{
-        if (self.showViews.count) {
-            for (UIView *view in self.showViews) {
-                [view removeVideoLayerViewAndIndicatorView];
-                [view hideActivityIndicatorView];
-                [view hideProgressView];
-                view.currentPlayingURL = nil;
-            }
-            [self.showViews removeAllObjects];
-        }
-        
         [[JPVideoPlayerPlayVideoTool sharedTool] stopPlay];
     });
 }
@@ -380,93 +370,8 @@
     return self.mute;
 }
 
-
-#pragma mark --------------------------------------------------
-#pragma mark JPVideoPlayerPlayVideoToolDelegate
-
--(BOOL)playVideoTool:(JPVideoPlayerPlayVideoTool *)videoTool shouldAutoReplayVideoForURL:(NSURL *)videoURL{
-    if (self.delegate && [self.delegate respondsToSelector:@selector(videoPlayerManager:shouldAutoReplayForURL:)]) {
-        return [self.delegate videoPlayerManager:self shouldAutoReplayForURL:videoURL];
-    }
-    return YES;
-}
-
-
 #pragma mark -----------------------------------------
 #pragma mark Private
-
--(void)hideAllIndicatorViewWithURL:(nullable NSURL *)url options:(JPVideoPlayerOptions)options{
-    [self hideProgressViewWithURL:url options:options];
-    [self hideActivityViewWithURL:url options:options];
-}
-
--(void)hideActivityViewWithURL:(nullable NSURL *)url options:(JPVideoPlayerOptions)options{
-    if (options & JPVideoPlayerDownloaderShowActivityIndicatorView){
-        dispatch_main_async_safe(^{
-            UIView *view = nil;
-            for (UIView *v in self.showViews) {
-                if (v.currentPlayingURL && [v.currentPlayingURL.absoluteString isEqualToString:url.absoluteString]) {
-                    view = v;
-                    break;
-                }
-            }
-            if (view) {
-                [view hideActivityIndicatorView];
-            }
-        });
-    }
-}
-
--(void)hideProgressViewWithURL:(nullable NSURL *)url options:(JPVideoPlayerOptions)options{
-    if (options & JPVideoPlayerDownloaderShowProgressView){
-        dispatch_main_async_safe(^{
-            UIView *view = nil;
-            for (UIView *v in self.showViews) {
-                if (v.currentPlayingURL && [v.currentPlayingURL.absoluteString isEqualToString:url.absoluteString]) {
-                    view = v;
-                    break;
-                }
-            }
-            if (view) {
-                [view hideProgressView];
-            }
-        });
-    }
-}
-
--(void)progressRefreshWithURL:(nullable NSURL *)url options:(JPVideoPlayerOptions)options receiveSize:(NSUInteger)receiveSize exceptSize:(NSUInteger)expectedSize{
-    if (options & JPVideoPlayerDownloaderShowProgressView){
-        dispatch_main_async_safe(^{
-            UIView *view = nil;
-            for (UIView *v in self.showViews) {
-                if (v.currentPlayingURL && [v.currentPlayingURL.absoluteString isEqualToString:url.absoluteString]) {
-                    view = v;
-                    break;
-                }
-            }
-            if (view) {
-                [view progressViewStatusChangedWithReceivedSize:receiveSize expectSize:expectedSize];
-            }
-        });
-    }
-}
-
--(void)startDownloadVideo:(nonnull NSNotification *)note{
-    dispatch_main_async_safe(^{
-        JPVideoPlayerDownloaderOperation *o = note.object;
-        if (o.options & JPVideoPlayerDownloaderShowProgressView || o.options & JPVideoPlayerDownloaderShowActivityIndicatorView) {
-            for (UIView *v in self.showViews) {
-                if (v.currentPlayingURL && [v.currentPlayingURL.absoluteString isEqualToString:o.request.URL.absoluteString]) {
-                    if (o.options & JPVideoPlayerDownloaderShowProgressView)
-                        [v showProgressView];
-                    if (o.options & JPVideoPlayerDownloaderShowActivityIndicatorView)
-                        [v showActivityIndicatorView];
-                    break;
-                }
-            }
-        }
-    });
-}
 
 - (void)safelyRemoveOperationFromRunning:(nullable JPVideoPlayerCombinedOperation*)operation {
     @synchronized (self.runningOperations) {
