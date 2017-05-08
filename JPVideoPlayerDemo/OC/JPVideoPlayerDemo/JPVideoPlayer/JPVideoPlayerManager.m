@@ -16,47 +16,7 @@
 #import "JPVideoPlayerDownloaderOperation.h"
 #import "JPVideoPlayerPlayVideoTool.h"
 #import "JPVideoPlayerPlayVideoToolItem.h"
-//#import "UIView+PlayerStatusAndDownloadIndicator.h"
-//#import "UIView+WebVideoCache.h"
-
-@interface JPVideoPlayerCombinedOperation : NSObject <JPVideoPlayerOperation>
-
-@property (assign, nonatomic, getter = isCancelled) BOOL cancelled;
-
-@property (copy, nonatomic, nullable) JPVideoPlayerNoParamsBlock cancelBlock;
-
-@property (strong, nonatomic, nullable) NSOperation *cacheOperation;
-
-@end
-
-@implementation JPVideoPlayerCombinedOperation
-
-- (void)setCancelBlock:(nullable JPVideoPlayerNoParamsBlock)cancelBlock {
-    // check if the operation is already cancelled, then we just call the cancelBlock
-    if (self.isCancelled) {
-        if (cancelBlock) {
-            cancelBlock();
-        }
-        _cancelBlock = nil; // don't forget to nil the cancelBlock, otherwise we will get crashes
-    } else {
-        _cancelBlock = [cancelBlock copy];
-    }
-}
-
-- (void)cancel {
-    self.cancelled = YES;
-    if (self.cacheOperation) {
-        [self.cacheOperation cancel];
-        self.cacheOperation = nil;
-    }
-    if (self.cancelBlock) {
-        self.cancelBlock();
-        _cancelBlock = nil;
-    }
-}
-
-@end
-
+#import "JPVideoPlayerCombinedOperation.h"
 
 @interface JPVideoPlayerManager()
 
@@ -80,7 +40,7 @@
     static dispatch_once_t once;
     static id instance;
     dispatch_once(&once, ^{
-        instance = [self new];
+        instance = [[self alloc] init];
     });
     return instance;
 }
@@ -111,7 +71,11 @@
 #pragma mark -----------------------------------------
 #pragma mark Public
 
-- (nullable id <JPVideoPlayerOperation>)loadVideoWithURL:(nullable NSURL *)url showOnView:(nullable UIView *)showView options:(JPVideoPlayerOptions)options progress:(nullable JPVideoPlayerDownloaderProgressBlock)progressBlock completed:(nullable JPVideoPlayerCompletionBlock)completedBlock{
+- (nullable id <JPVideoPlayerOperation>)loadVideoWithURL:(nullable NSURL *)url
+                                              showOnView:(nullable UIView *)showView
+                                                 options:(JPVideoPlayerOptions)options
+                                                progress:(nullable JPVideoPlayerDownloaderProgressBlock)progressBlock
+                                               completed:(nullable JPVideoPlayerCompletionBlock)completedBlock {
     
     // Very common mistake is to send the URL using NSString object instead of NSURL. For some strange reason, XCode won't
     // throw any warning for this type mismatch. Here we failsafe this error by allowing URLs to be passed as NSString.
@@ -124,7 +88,7 @@
         url = nil;
     }
     
-    __block JPVideoPlayerCombinedOperation *operation = [JPVideoPlayerCombinedOperation new];
+    __block JPVideoPlayerCombinedOperation *operation = [[JPVideoPlayerCombinedOperation alloc] init];
     __weak JPVideoPlayerCombinedOperation *weakOperation = operation;
     
     BOOL isFailedUrl = NO;
@@ -135,13 +99,19 @@
     }
     
     if (url.absoluteString.length == 0 || (!(options & JPVideoPlayerRetryFailed) && isFailedUrl)) {
-        [self callCompletionBlockForOperation:operation completion:completedBlock videoPath:nil error:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorFileDoesNotExist userInfo:nil] cacheType:JPVideoPlayerCacheTypeNone url:url];
+        [self callCompletionBlockForOperation:operation
+                                   completion:completedBlock
+                                    videoPath:nil
+                                        error:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorFileDoesNotExist userInfo:nil]
+                                    cacheType:JPVideoPlayerCacheTypeNone
+                                          url:url];
         return operation;
     }
     
     @synchronized (self.runningOperations) {
         [self.runningOperations addObject:operation];
     }
+    
     @synchronized (self.showViews) {
         [self.showViews addObject:showView];
     }
@@ -149,24 +119,28 @@
     NSString *key = [self cacheKeyForURL:url];
     
     BOOL isFileURL = [url isFileURL];
+    
     if (isFileURL) {
         
         // local file.
         NSString *path = [url.absoluteString stringByReplacingOccurrencesOfString:@"file://" withString:@""];
+        
         if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
             [[JPVideoPlayerPlayVideoTool sharedTool] playExistedVideoWithURL:url fullVideoCachePath:path options:options showOnView:showView error:^(NSError * _Nullable error) {
                 if (completedBlock) {
                     completedBlock(nil, error, JPVideoPlayerCacheTypeLocation, url);
                 }
             }];
-//            [JPVideoPlayerPlayVideoTool sharedTool].delegate = self;
-        }
-        else{
-            [self callCompletionBlockForOperation:operation completion:completedBlock videoPath:nil error:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorFileDoesNotExist userInfo:nil] cacheType:JPVideoPlayerCacheTypeNone url:url];
+        } else {
+            [self callCompletionBlockForOperation:operation
+                                       completion:completedBlock
+                                        videoPath:nil
+                                            error:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorFileDoesNotExist userInfo:nil]
+                                        cacheType:JPVideoPlayerCacheTypeNone
+                                              url:url];
             return operation;
         }
-    }
-    else{
+    } else {
         operation.cacheOperation = [self.videoCache queryCacheOperationForKey:key done:^(NSString * _Nullable videoPath, JPVideoPlayerCacheType cacheType) {
             
             if (operation.isCancelled) {
@@ -312,7 +286,7 @@
                 __strong __typeof(weakOperation) strongOperation = weakOperation;
                 
                 // play video from disk.
-                if (cacheType==JPVideoPlayerCacheTypeDisk) {
+                if (cacheType == JPVideoPlayerCacheTypeDisk) {
                     [[JPVideoPlayerPlayVideoTool sharedTool] playExistedVideoWithURL:url fullVideoCachePath:videoPath options:options showOnView:showView error:^(NSError * _Nullable error) {
                         if (completedBlock) {
                             completedBlock(nil, error, JPVideoPlayerCacheTypeDisk, url);
@@ -323,8 +297,7 @@
                 
                 [self callCompletionBlockForOperation:strongOperation completion:completedBlock videoPath:videoPath error:nil cacheType:JPVideoPlayerCacheTypeDisk url:url];
                 [self safelyRemoveOperationFromRunning:operation];
-            }
-            else {
+            } else {
                 // video not in cache and download disallowed by delegate.
                 __strong __typeof(weakOperation) strongOperation = weakOperation;
                 [self callCompletionBlockForOperation:strongOperation completion:completedBlock videoPath:nil error:nil cacheType:JPVideoPlayerCacheTypeNone url:url];
@@ -338,42 +311,35 @@
     return operation;
 }
 
--(void)cancelAllDownloads{
+- (void)cancelAllDownloads{
     [self.videoDownloader cancelAllDownloads];
 }
 
 - (nullable NSString *)cacheKeyForURL:(nullable NSURL *)url {
-    if (!url) {
-        return @"";
-    }
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    url = [[NSURL alloc] initWithScheme:url.scheme host:url.host path:url.path];
-#pragma clang diagnostic pop
-    return [url absoluteString];
+    return [_videoCache cacheKeyForURL:url];
 }
 
--(void)stopPlay{
+- (void)stopPlay{
     dispatch_main_async_safe(^{
         [[JPVideoPlayerPlayVideoTool sharedTool] stopPlay];
     });
 }
 
--(void)setPlayerMute:(BOOL)mute{
+- (void)setPlayerMute:(BOOL)mute{
     if ([JPVideoPlayerPlayVideoTool sharedTool].currentPlayVideoItem) {
         [[JPVideoPlayerPlayVideoTool sharedTool] setMute:mute];
     }
     self.mute = mute;
 }
 
--(BOOL)playerIsMute{
+- (BOOL)playerIsMute{
     return self.mute;
 }
 
 #pragma mark -----------------------------------------
 #pragma mark Private
 
-- (void)safelyRemoveOperationFromRunning:(nullable JPVideoPlayerCombinedOperation*)operation {
+- (void)safelyRemoveOperationFromRunning:(nullable JPVideoPlayerCombinedOperation *)operation {
     @synchronized (self.runningOperations) {
         if (operation) {
             [self.runningOperations removeObject:operation];
@@ -381,7 +347,12 @@
     }
 }
 
-- (void)callCompletionBlockForOperation:(nullable JPVideoPlayerCombinedOperation*)operation completion:(nullable JPVideoPlayerCompletionBlock)completionBlock videoPath:(nullable NSString *)videoPath error:(nullable NSError *)error cacheType:(JPVideoPlayerCacheType)cacheType url:(nullable NSURL *)url {
+- (void)callCompletionBlockForOperation:(nullable JPVideoPlayerCombinedOperation *)operation
+                             completion:(nullable JPVideoPlayerCompletionBlock)completionBlock
+                              videoPath:(nullable NSString *)videoPath
+                                  error:(nullable NSError *)error
+                              cacheType:(JPVideoPlayerCacheType)cacheType
+                                    url:(nullable NSURL *)url {
     dispatch_main_async_safe(^{
         if (operation && !operation.isCancelled && completionBlock) {
             completionBlock(videoPath, error, cacheType, url);

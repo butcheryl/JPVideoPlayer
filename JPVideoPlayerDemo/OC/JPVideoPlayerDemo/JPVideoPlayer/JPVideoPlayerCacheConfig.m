@@ -12,12 +12,12 @@
 
 #import "JPVideoPlayerCacheConfig.h"
 
-static const NSInteger kDefaultCacheMaxCacheAge = 60*60*24*7; // 1 week
-static const NSInteger kDefaultCacheMaxSize = 1000*1000*1000; // 1 GB
+static const NSInteger kDefaultCacheMaxCacheAge = 60 * 60 * 24 * 7; // 1 week
+static const NSInteger kDefaultCacheMaxSize = 1000 * 1000 * 1000; // 1 GB
 
 @implementation JPVideoPlayerCacheConfig
 
--(instancetype)init{
+- (instancetype)init{
     self = [super init];
     if (self) {
         _maxCacheAge =  kDefaultCacheMaxCacheAge;

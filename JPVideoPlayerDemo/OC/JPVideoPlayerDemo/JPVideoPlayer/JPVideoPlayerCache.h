@@ -10,14 +10,11 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "JPVideoPlayerCompat.h"
 #import "JPVideoPlayerDefine.h"
 
 @class JPVideoPlayerCacheConfig;
+@class JPVideoPlayerCacheToken;
 
-@interface JPVideoPlayerCacheToken : NSObject
-
-@end
 
 /**
  * JPVideoPlayerCache maintains a disk cache. Disk cache write operations are performed
@@ -30,7 +27,7 @@
 /**
  *  Cache Config object - storing all kind of settings.
  */
-@property (nonatomic, nonnull, readonly)JPVideoPlayerCacheConfig *config;
+@property (nonatomic, nonnull, readonly) JPVideoPlayerCacheConfig *config;
 
 /**
  * Returns global shared cache instance.
@@ -38,7 +35,6 @@
  * @return JPVideoPlayerCache global instance.
  */
 + (nonnull instancetype)sharedCache;
-
 
 # pragma mark - Store Video Options
 
@@ -53,7 +49,10 @@
  *
  * @return A token (@see JPVideoPlayerCacheToken) that can be passed to -cancel: to cancel this operation.
  */
-- (nullable JPVideoPlayerCacheToken *)storeVideoData:(nullable NSData *)videoData expectedSize:(NSUInteger)expectedSize forKey:(nullable NSString *)key completion:(nullable JPVideoPlayerStoreDataFinishedBlock)completionBlock;
+- (nullable JPVideoPlayerCacheToken *)storeVideoData:(nullable NSData *)videoData
+                                        expectedSize:(NSUInteger)expectedSize
+                                              forKey:(nullable NSString *)key
+                                          completion:(nullable JPVideoPlayerStoreDataFinishedBlock)completionBlock;
 
 /**
  * Cancels a cache that was previously queued using -storeVideoData:expectedSize:progress:forKey:completion:.
@@ -65,10 +64,10 @@
 /**
  * This method is be used to cancel current completion block when cache a peice of video data finished.
  */
--(void)cancelCurrentComletionBlock;
+- (void)cancelCurrentComletionBlock;
 
 
-# pragma - Query and Retrieve Options
+#pragma - Query and Retrieve Options
 /**
  * Async check if video exists in disk cache already (does not load the video).
  *
@@ -76,7 +75,7 @@
  * @param completionBlock the block to be executed when the check is done.
  * @note the completion block will be always executed on the main queue.
  */
-- (void)diskVideoExistsWithKey:(nullable NSString *)key completion:(nullable JPVideoPlayerCheckCacheCompletionBlock)completionBlock;
+- (void)diskVideoExistsWithKey:(nonnull NSString *)key completion:(nonnull JPVideoPlayerCheckCacheCompletionBlock)completionBlock;
 
 /**
  * Operation that queries the cache asynchronously and call the completion when done.
@@ -86,7 +85,7 @@
  *
  * @return a NSOperation instance containing the cache options.
  */
-- (nullable NSOperation *)queryCacheOperationForKey:(nullable NSString *)key done:(nullable JPVideoPlayerCacheQueryCompletedBlock)doneBlock;
+- (nullable NSOperation *)queryCacheOperationForKey:(nonnull NSString *)key done:(nonnull JPVideoPlayerCacheQueryCompletedBlock)doneBlock;
 
 /**
  * Async check if video exists in disk cache already (does not load the video).
@@ -95,7 +94,7 @@
  *
  * @return if the file is existed for given video path, return YES, return NO, otherwise.
  */
-- (BOOL)diskVideoExistsWithPath:(NSString * _Nullable)fullVideoCachePath;
+- (BOOL)diskVideoExistsWithPath:(nonnull NSString *)fullVideoCachePath;
 
 
 # pragma - Clear Cache Events
@@ -169,14 +168,20 @@
  */
 - (void)calculateSizeWithCompletionBlock:(nullable JPVideoPlayerCalculateSizeBlock)completionBlock;
 
-
-# pragma mark - File Name
+#pragma mark - File Name
 
 /**
  *  Generate the video file's name for given key.
  *
  *  @return the file's name.
  */
--(nullable NSString *)cacheFileNameForKey:(nullable NSString *)key;
+- (nullable NSString *)cacheFileNameForKey:(nullable NSString *)key;
 
+/**
+ Generate the video key for given video url.
+
+ @param url video url
+ @return the video file's key
+ */
+- (nullable NSString *)cacheKeyForURL:(nullable NSURL *)url;
 @end

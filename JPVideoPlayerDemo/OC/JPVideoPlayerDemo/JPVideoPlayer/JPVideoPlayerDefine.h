@@ -9,6 +9,8 @@
 #ifndef JPVideoPlayerDefine_h
 #define JPVideoPlayerDefine_h
 
+#define JPLog(FORMAT, ...); fprintf(stderr,"%s\n",[[NSString stringWithFormat:FORMAT, ##__VA_ARGS__] UTF8String]);
+
 typedef NS_OPTIONS(NSUInteger, JPVideoPlayerOptions) {
     /**
      * By default, when a URL fail to be downloaded, the URL is blacklisted so the library won't keep trying.

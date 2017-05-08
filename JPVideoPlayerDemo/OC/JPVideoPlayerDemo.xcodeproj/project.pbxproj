@@ -11,6 +11,8 @@
 		39BCE6DA1EC0144400ED3766 /* JPVideoPlayer.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 39BCE6D91EC0144400ED3766 /* JPVideoPlayer.podspec */; };
 		39BCE6DD1EC0165200ED3766 /* JPVideoPlayerPlayVideoTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 39BCE6DC1EC0165200ED3766 /* JPVideoPlayerPlayVideoTool.m */; };
 		39BCE6E01EC018AF00ED3766 /* JPVideoPlayerPlayVideoToolItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 39BCE6DF1EC018AF00ED3766 /* JPVideoPlayerPlayVideoToolItem.m */; };
+		39BCE6E71EC059BA00ED3766 /* JPVideoPlayerCombinedOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 39BCE6E61EC059BA00ED3766 /* JPVideoPlayerCombinedOperation.m */; };
+		39BCE6EB1EC06E9F00ED3766 /* JPVideoPlayerCacheToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 39BCE6EA1EC06E9F00ED3766 /* JPVideoPlayerCacheToken.m */; };
 		48D290401E7842D50024C5C6 /* hello.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 48D2903F1E7842D50024C5C6 /* hello.mp4 */; };
 		5F6705681DADE88F001EBFAF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F6705671DADE88F001EBFAF /* main.m */; };
 		5F67056B1DADE88F001EBFAF /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F67056A1DADE88F001EBFAF /* AppDelegate.m */; };
@@ -36,6 +38,10 @@
 		39BCE6DE1EC018AF00ED3766 /* JPVideoPlayerPlayVideoToolItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JPVideoPlayerPlayVideoToolItem.h; sourceTree = "<group>"; };
 		39BCE6DF1EC018AF00ED3766 /* JPVideoPlayerPlayVideoToolItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JPVideoPlayerPlayVideoToolItem.m; sourceTree = "<group>"; };
 		39BCE6E11EC0213200ED3766 /* JPVideoPlayerDefine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JPVideoPlayerDefine.h; sourceTree = "<group>"; };
+		39BCE6E51EC059BA00ED3766 /* JPVideoPlayerCombinedOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JPVideoPlayerCombinedOperation.h; sourceTree = "<group>"; };
+		39BCE6E61EC059BA00ED3766 /* JPVideoPlayerCombinedOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JPVideoPlayerCombinedOperation.m; sourceTree = "<group>"; };
+		39BCE6E91EC06E9F00ED3766 /* JPVideoPlayerCacheToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JPVideoPlayerCacheToken.h; sourceTree = "<group>"; };
+		39BCE6EA1EC06E9F00ED3766 /* JPVideoPlayerCacheToken.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JPVideoPlayerCacheToken.m; sourceTree = "<group>"; };
 		48D2903F1E7842D50024C5C6 /* hello.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = hello.mp4; sourceTree = "<group>"; };
 		5F6705631DADE88F001EBFAF /* JPVideoPlayerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JPVideoPlayerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F6705671DADE88F001EBFAF /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -93,6 +99,8 @@
 				5F9E0A081E6955CA00D20B29 /* JPVideoPlayerCacheConfig.m */,
 				5F9E0A091E6955CA00D20B29 /* JPVideoPlayerCachePathTool.h */,
 				5F9E0A0A1E6955CA00D20B29 /* JPVideoPlayerCachePathTool.m */,
+				39BCE6E91EC06E9F00ED3766 /* JPVideoPlayerCacheToken.h */,
+				39BCE6EA1EC06E9F00ED3766 /* JPVideoPlayerCacheToken.m */,
 			);
 			name = Cache;
 			sourceTree = "<group>";
@@ -113,10 +121,22 @@
 			children = (
 				39BCE6DB1EC0165200ED3766 /* JPVideoPlayerPlayVideoTool.h */,
 				39BCE6DC1EC0165200ED3766 /* JPVideoPlayerPlayVideoTool.m */,
+				5F9E0A151E6955CA00D20B29 /* JPVideoPlayerResourceLoader.h */,
+				5F9E0A161E6955CA00D20B29 /* JPVideoPlayerResourceLoader.m */,
 				39BCE6DE1EC018AF00ED3766 /* JPVideoPlayerPlayVideoToolItem.h */,
 				39BCE6DF1EC018AF00ED3766 /* JPVideoPlayerPlayVideoToolItem.m */,
 			);
 			name = Tool;
+			sourceTree = "<group>";
+		};
+		39BCE6E81EC05A0C00ED3766 /* Operation */ = {
+			isa = PBXGroup;
+			children = (
+				5F9E0A121E6955CA00D20B29 /* JPVideoPlayerOperation.h */,
+				39BCE6E51EC059BA00ED3766 /* JPVideoPlayerCombinedOperation.h */,
+				39BCE6E61EC059BA00ED3766 /* JPVideoPlayerCombinedOperation.m */,
+			);
+			name = Operation;
 			sourceTree = "<group>";
 		};
 		5F67055A1DADE88F001EBFAF = {
@@ -168,13 +188,11 @@
 				39BCE6E21EC0225000ED3766 /* Cache */,
 				39BCE6E31EC025D500ED3766 /* Download */,
 				39BCE6E41EC025F300ED3766 /* Tool */,
+				39BCE6E81EC05A0C00ED3766 /* Operation */,
 				39BCE6E11EC0213200ED3766 /* JPVideoPlayerDefine.h */,
 				5F9E0A0B1E6955CA00D20B29 /* JPVideoPlayerCompat.h */,
-				5F9E0A121E6955CA00D20B29 /* JPVideoPlayerOperation.h */,
 				5F9E0A101E6955CA00D20B29 /* JPVideoPlayerManager.h */,
 				5F9E0A111E6955CA00D20B29 /* JPVideoPlayerManager.m */,
-				5F9E0A151E6955CA00D20B29 /* JPVideoPlayerResourceLoader.h */,
-				5F9E0A161E6955CA00D20B29 /* JPVideoPlayerResourceLoader.m */,
 			);
 			path = JPVideoPlayer;
 			sourceTree = "<group>";
@@ -314,6 +332,7 @@
 			files = (
 				5F9E0A251E6955CA00D20B29 /* JPVideoPlayerCachePathTool.m in Sources */,
 				5F9E0A2A1E6955CA00D20B29 /* JPVideoPlayerResourceLoader.m in Sources */,
+				39BCE6E71EC059BA00ED3766 /* JPVideoPlayerCombinedOperation.m in Sources */,
 				5F9E0A271E6955CA00D20B29 /* JPVideoPlayerDownloaderOperation.m in Sources */,
 				5F9E0A231E6955CA00D20B29 /* JPVideoPlayerCache.m in Sources */,
 				5F9E0A281E6955CA00D20B29 /* JPVideoPlayerManager.m in Sources */,
@@ -321,6 +340,7 @@
 				5F9E0A241E6955CA00D20B29 /* JPVideoPlayerCacheConfig.m in Sources */,
 				5F67056B1DADE88F001EBFAF /* AppDelegate.m in Sources */,
 				5F6705681DADE88F001EBFAF /* main.m in Sources */,
+				39BCE6EB1EC06E9F00ED3766 /* JPVideoPlayerCacheToken.m in Sources */,
 				39BCE6E01EC018AF00ED3766 /* JPVideoPlayerPlayVideoToolItem.m in Sources */,
 				5F9E0A261E6955CA00D20B29 /* JPVideoPlayerDownloader.m in Sources */,
 			);

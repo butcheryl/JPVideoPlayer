@@ -11,38 +11,13 @@
 
 
 #import "JPVideoPlayerCache.h"
+#import "JPVideoPlayerCacheToken.h"
 #import "JPVideoPlayerCacheConfig.h"
 #import "JPVideoPlayerCachePathTool.h"
 #import "JPVideoPlayerCompat.h"
-#import "JPVideoPlayerManager.h"
 #import "JPVideoPlayerDownloaderOperation.h"
 
-#include <sys/param.h>
 #include <sys/mount.h>
-#import <CommonCrypto/CommonDigest.h>
-
-@interface JPVideoPlayerCacheToken()
-
-/**
- * outputStream.
- */
-@property(nonnull, nonatomic, strong)NSOutputStream *outputStream;
-
-/**
- * Received video size.
- */
-@property(nonatomic, assign)NSUInteger receivedVideoSize;
-
-/**
- * key.
- */
-@property(nonnull, nonatomic, strong)NSString *key;
-
-@end
-
-@implementation JPVideoPlayerCacheToken
-
-@end
 
 @interface JPVideoPlayerCache()
 
@@ -51,30 +26,35 @@
 /**
  * OutputStreams.
  */
-@property(nonatomic, strong, nonnull)NSMutableArray<JPVideoPlayerCacheToken *> *outputStreams;
+@property(nonatomic, strong, nonnull) NSMutableArray<JPVideoPlayerCacheToken *> *outputStreams;
 
 /**
  * completionBlock can be call or not.
  */
-@property(nonatomic, assign, getter=isCompletionBlockEnable)BOOL completionBlockEnable;
+@property(nonatomic, assign, getter=isCompletionBlockEnable) BOOL completionBlockEnable;
 
 @end
 
-@implementation JPVideoPlayerCache{
+@implementation JPVideoPlayerCache {
     NSFileManager *_fileManager;
 }
 
--(instancetype)init{
-    self = [super init];
-    if (self) {
+- (instancetype)init {
+    if (self = [super init]) {
         // Create IO serial queue
         _ioQueue = dispatch_queue_create("com.NewPan.JPVideoPlayerCache", DISPATCH_QUEUE_SERIAL);
         
         _config = [[JPVideoPlayerCacheConfig alloc] init];
+        
         _fileManager = [NSFileManager defaultManager];
+        
         _outputStreams = [NSMutableArray array];
         
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(downloadVideoDidStart:) name:JPVideoPlayerDownloadStartNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(downloadVideoDidStart:)
+                                                     name:JPVideoPlayerDownloadStartNotification
+                                                   object:nil];
+        
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(deleteOldFiles)
                                                      name:UIApplicationWillTerminateNotification
@@ -92,12 +72,12 @@
     static dispatch_once_t once;
     static id instance;
     dispatch_once(&once, ^{
-        instance = [self new];
+        instance = [[self alloc] init];
     });
     return instance;
 }
 
--(void)dealloc{
+- (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -105,10 +85,10 @@
 #pragma mark -----------------------------------------
 #pragma mark Store Video Options
 
--(void)downloadVideoDidStart:(NSNotification *)notification{
+- (void)downloadVideoDidStart:(NSNotification *)notification {
     JPVideoPlayerDownloaderOperation *operation = notification.object;
     NSURL *url = operation.request.URL;
-    NSString *key = [[JPVideoPlayerManager sharedManager] cacheKeyForURL:url];
+    NSString *key = [self cacheKeyForURL:url];
     [self removeTempCacheForKey:key withCompletion:nil];
     
     @autoreleasepool {
@@ -116,11 +96,14 @@
     }
 }
 
--(nullable JPVideoPlayerCacheToken *)storeVideoData:(nullable NSData *)videoData expectedSize:(NSUInteger)expectedSize forKey:(nullable NSString *)key completion:(nullable JPVideoPlayerStoreDataFinishedBlock)completionBlock{
+- (nullable JPVideoPlayerCacheToken *)storeVideoData:(nullable NSData *)videoData
+                                        expectedSize:(NSUInteger)expectedSize
+                                              forKey:(nullable NSString *)key
+                                          completion:(nullable JPVideoPlayerStoreDataFinishedBlock)completionBlock {
     
-    if (videoData.length==0) return nil;
+    if (videoData.length == 0) return nil;
     
-    if (key.length==0) {
+    if (key.length == 0) {
         if (completionBlock)
             completionBlock(0, [NSError errorWithDomain:@"Need a key for storing video data" code:0 userInfo:nil], nil);
         return nil;
@@ -135,13 +118,16 @@
     
     @synchronized (self) {
         self.completionBlockEnable = YES;
+        
         JPVideoPlayerCacheToken *targetToken = nil;
+        
         for (JPVideoPlayerCacheToken *token in self.outputStreams) {
             if ([token.key isEqualToString:key]) {
                 targetToken = token;
                 break;
             }
         }
+        
         if (!targetToken) {
             NSString *path = [JPVideoPlayerCachePathTool videoCacheTemporaryPathForKey:key];
             NSOutputStream *stream = [[NSOutputStream alloc]initToFileAtPath:path append:YES];
@@ -153,9 +139,10 @@
             targetToken = token;
         }
 
-        if (videoData.length>0) {
+        if (videoData.length > 0) {
             dispatch_async(self.ioQueue, ^{
                 [targetToken.outputStream write:videoData.bytes maxLength:videoData.length];
+                
                 targetToken.receivedVideoSize += videoData.length;
                 
                 NSString *tempVideoCachePath = [JPVideoPlayerCachePathTool videoCacheTemporaryPathForKey:key];
@@ -197,14 +184,14 @@
     }
 }
 
-- (void)cancel:(nullable JPVideoPlayerCacheToken *)token{
+- (void)cancel:(nullable JPVideoPlayerCacheToken *)token {
     if (token) {
         [self.outputStreams removeObject:token];
         [self cancelCurrentComletionBlock];
     }
 }
 
--(void)cancelCurrentComletionBlock{
+- (void)cancelCurrentComletionBlock {
     self.completionBlockEnable = NO;
 }
 
@@ -212,73 +199,68 @@
 #pragma mark -----------------------------------------
 #pragma mark Query and Retrieve Options
 
-- (nullable NSOperation *)queryCacheOperationForKey:(nullable NSString *)key done:(nullable JPVideoPlayerCacheQueryCompletedBlock)doneBlock {
-    if (!key) {
-        if (doneBlock) {
-            doneBlock(nil, JPVideoPlayerCacheTypeNone);
-        }
+- (nullable NSOperation *)queryCacheOperationForKey:(nonnull NSString *)key done:(nonnull JPVideoPlayerCacheQueryCompletedBlock)doneBlock {
+    if (!doneBlock) {
         return nil;
     }
     
-    NSOperation *operation = [NSOperation new];
+    if (!key) {
+        doneBlock(nil, JPVideoPlayerCacheTypeNone);
+        return nil;
+    }
+    
+    NSOperation *operation = [[NSOperation alloc] init];
+    
     dispatch_async(self.ioQueue, ^{
         if (operation.isCancelled) {
-            // do not call the completion if cancelled
-            return;
+            return ; // do not call the completion if cancelled
         }
         
         @autoreleasepool {
-            BOOL exists = [_fileManager fileExistsAtPath:[JPVideoPlayerCachePathTool videoCacheFullPathForKey:key]];
+            NSString *path = [JPVideoPlayerCachePathTool videoCacheFullPathForKey:key];
             
-            if (!exists) {
-                exists = [_fileManager fileExistsAtPath:[JPVideoPlayerCachePathTool videoCacheFullPathForKey:key].stringByDeletingPathExtension];
-            }
+            BOOL exists = [_fileManager fileExistsAtPath:path] || [_fileManager fileExistsAtPath:path.stringByDeletingPathExtension];
             
-            if (exists) {
-                if (doneBlock) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        doneBlock([JPVideoPlayerCachePathTool videoCacheFullPathForKey:key], JPVideoPlayerCacheTypeDisk);
-                    });
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (exists) {
+                    doneBlock([JPVideoPlayerCachePathTool videoCacheFullPathForKey:key], JPVideoPlayerCacheTypeDisk);
+                } else {
+                    doneBlock(nil, JPVideoPlayerCacheTypeNone);
                 }
-            }
-            else{
-                if (doneBlock) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        doneBlock(nil, JPVideoPlayerCacheTypeNone);
-                    });
-                }
-            }
+            });
         }
     });
     
     return operation;
 }
 
--(void)diskVideoExistsWithKey:(NSString *)key completion:(JPVideoPlayerCheckCacheCompletionBlock)completionBlock{
+- (void)diskVideoExistsWithKey:(nonnull NSString *)key completion:(nonnull JPVideoPlayerCheckCacheCompletionBlock)completionBlock {
+    if (!key || key.length == 0 || !completionBlock) {
+        return ;
+    }
+    
     dispatch_async(_ioQueue, ^{
-        BOOL exists = [_fileManager fileExistsAtPath:[JPVideoPlayerCachePathTool videoCacheFullPathForKey:key]];
-
-        if (!exists) {
-            exists = [_fileManager fileExistsAtPath:[JPVideoPlayerCachePathTool videoCacheFullPathForKey:key].stringByDeletingPathExtension];
-        }
+        NSString *path = [JPVideoPlayerCachePathTool videoCacheFullPathForKey:key];
         
-        if (completionBlock) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                completionBlock(exists);
-            });
-        }
+        BOOL exists = [_fileManager fileExistsAtPath:path] || [_fileManager fileExistsAtPath:path.stringByDeletingPathExtension];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            completionBlock(exists);
+        });
     });
 }
 
--(BOOL)diskVideoExistsWithPath:(NSString * _Nullable)fullVideoCachePath{
+- (BOOL)diskVideoExistsWithPath:(nonnull NSString *)fullVideoCachePath {
+    if (fullVideoCachePath == nil) {
+        return NO;
+    }
     return [_fileManager fileExistsAtPath:fullVideoCachePath];
 }
-
 
 #pragma mark -----------------------------------------
 #pragma mark Clear Cache Events
 
-- (void)removeFullCacheForKey:(nullable NSString *)key withCompletion:(nullable JPVideoPlayerNoParamsBlock)completion{
+- (void)removeFullCacheForKey:(nullable NSString *)key withCompletion:(nullable JPVideoPlayerNoParamsBlock)completion {
     dispatch_async(self.ioQueue, ^{
         if ([_fileManager fileExistsAtPath:[JPVideoPlayerCachePathTool videoCacheFullPathForKey:key]]) {
             [_fileManager removeItemAtPath:[JPVideoPlayerCachePathTool videoCacheFullPathForKey:key] error:nil];
@@ -291,10 +273,10 @@
     });
 }
 
--(void)removeTempCacheForKey:(NSString * _Nonnull)key withCompletion:(nullable JPVideoPlayerNoParamsBlock)completion{
+- (void)removeTempCacheForKey:(NSString * _Nonnull)key withCompletion:(nullable JPVideoPlayerNoParamsBlock)completion {
     dispatch_async(self.ioQueue, ^{
         NSString *path = [JPVideoPlayerCachePathTool videoCachePathForAllTemporaryFile];
-        path = [path stringByAppendingPathComponent:[[JPVideoPlayerCache sharedCache] cacheFileNameForKey:key]];
+        path = [path stringByAppendingPathComponent:[self cacheFileNameForKey:key]];
         NSFileManager *fileManager = [NSFileManager defaultManager];
         if ([fileManager fileExistsAtPath:path]) {
             [fileManager removeItemAtPath:path error:nil];
@@ -309,7 +291,7 @@
     });
 }
 
-- (void)deleteOldFilesWithCompletionBlock:(nullable JPVideoPlayerNoParamsBlock)completionBlock{
+- (void)deleteOldFilesWithCompletionBlock:(nullable JPVideoPlayerNoParamsBlock)completionBlock {
     dispatch_async(self.ioQueue, ^{
         NSURL *diskCacheURL = [NSURL fileURLWithPath:[JPVideoPlayerCachePathTool videoCachePathForAllFullFile] isDirectory:YES];
         NSArray<NSString *> *resourceKeys = @[NSURLIsDirectoryKey, NSURLContentModificationDateKey, NSURLTotalFileAllocatedSizeKey];
@@ -391,7 +373,7 @@
     });
 }
 
-- (void)deleteAllTempCacheOnCompletion:(nullable JPVideoPlayerNoParamsBlock)completion{
+- (void)deleteAllTempCacheOnCompletion:(nullable JPVideoPlayerNoParamsBlock)completion {
     dispatch_async(self.ioQueue, ^{
         [_fileManager removeItemAtPath:[JPVideoPlayerCachePathTool videoCachePathForAllTemporaryFile] error:nil];
         dispatch_main_async_safe(^{
@@ -402,7 +384,7 @@
     });
 }
 
-- (void)clearDiskOnCompletion:(nullable JPVideoPlayerNoParamsBlock)completion{
+- (void)clearDiskOnCompletion:(nullable JPVideoPlayerNoParamsBlock)completion {
     dispatch_async(self.ioQueue, ^{
         [_fileManager removeItemAtPath:[JPVideoPlayerCachePathTool videoCachePathForAllFullFile] error:nil];
         [_fileManager removeItemAtPath:[JPVideoPlayerCachePathTool videoCachePathForAllTemporaryFile] error:nil];
@@ -418,26 +400,25 @@
 #pragma mark -----------------------------------------
 #pragma mark File Name
 
--(nullable NSString *)cacheFileNameForKey:(nullable NSString *)key{
-    return [self cachedFileNameForKey:key];
+- (nullable NSString *)cacheFileNameForKey:(nullable NSString *)key {
+    return [JPVideoPlayerCachePathTool cacheFileNameForKey:key];
 }
 
--(nullable NSString *)cachedFileNameForKey:(nullable NSString *)key {
-    const char *str = key.UTF8String;
-    if (str == NULL) str = "";
-    unsigned char r[CC_MD5_DIGEST_LENGTH];
-    CC_MD5(str, (CC_LONG)strlen(str), r);
-    NSString *filename = [NSString stringWithFormat:@"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%@",
-                          r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10],
-                          r[11], r[12], r[13], r[14], r[15], [key.pathExtension isEqualToString:@""] ? @"" : [NSString stringWithFormat:@".%@", key.pathExtension]];
-    return filename;
+- (nullable NSString *)cacheKeyForURL:(nullable NSURL *)url {
+    if (!url) {
+        return @"";
+    }
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    url = [[NSURL alloc] initWithScheme:url.scheme host:url.host path:url.path];
+#pragma clang diagnostic pop
+    return [url absoluteString];
 }
-
 
 #pragma mark -----------------------------------------
 #pragma mark Cache Info
 
--(BOOL)haveFreeSizeToCacheFileWithSize:(NSUInteger)fileSize{
+- (BOOL)haveFreeSizeToCacheFileWithSize:(NSUInteger)fileSize{
     unsigned long long freeSizeOfDevice = [self getDiskFreeSize];
     if (fileSize > freeSizeOfDevice) {
         return NO;
@@ -445,7 +426,7 @@
     return YES;
 }
 
--(unsigned long long)getSize{
+- (unsigned long long)getSize {
     __block unsigned long long size = 0;
     dispatch_sync(self.ioQueue, ^{
         NSString *tempFilePath = [JPVideoPlayerCachePathTool videoCachePathForAllTemporaryFile];
@@ -471,7 +452,7 @@
     return size;
 }
 
--(NSUInteger)getDiskCount{
+- (NSUInteger)getDiskCount {
     __block NSUInteger count = 0;
     dispatch_sync(self.ioQueue, ^{
         NSString *tempFilePath = [JPVideoPlayerCachePathTool videoCachePathForAllTemporaryFile];
@@ -486,7 +467,7 @@
     return count;
 }
 
--(void)calculateSizeWithCompletionBlock:(JPVideoPlayerCalculateSizeBlock)completionBlock{
+- (void)calculateSizeWithCompletionBlock:(JPVideoPlayerCalculateSizeBlock)completionBlock {
     
     NSString *tempFilePath = [JPVideoPlayerCachePathTool videoCachePathForAllTemporaryFile];
     NSString *fullFilePath = [JPVideoPlayerCachePathTool videoCachePathForAllFullFile];
@@ -498,7 +479,10 @@
         NSUInteger fileCount = 0;
         NSUInteger totalSize = 0;
         
-        NSDirectoryEnumerator *fileEnumerator_temp = [_fileManager enumeratorAtURL:diskCacheURL_temp includingPropertiesForKeys:@[NSFileSize] options:NSDirectoryEnumerationSkipsHiddenFiles errorHandler:NULL];
+        NSDirectoryEnumerator *fileEnumerator_temp = [_fileManager enumeratorAtURL:diskCacheURL_temp
+                                                        includingPropertiesForKeys:@[NSFileSize]
+                                                                           options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                      errorHandler:NULL];
         for (NSURL *fileURL in fileEnumerator_temp) {
             NSNumber *fileSize;
             [fileURL getResourceValue:&fileSize forKey:NSURLFileSizeKey error:NULL];
@@ -506,7 +490,10 @@
             fileCount += 1;
         }
         
-        NSDirectoryEnumerator *fileEnumerator_full = [_fileManager enumeratorAtURL:diskCacheURL_full includingPropertiesForKeys:@[NSFileSize] options:NSDirectoryEnumerationSkipsHiddenFiles errorHandler:NULL];
+        NSDirectoryEnumerator *fileEnumerator_full = [_fileManager enumeratorAtURL:diskCacheURL_full
+                                                        includingPropertiesForKeys:@[NSFileSize]
+                                                                           options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                                      errorHandler:NULL];
         for (NSURL *fileURL in fileEnumerator_full) {
             NSNumber *fileSize;
             [fileURL getResourceValue:&fileSize forKey:NSURLFileSizeKey error:NULL];
@@ -522,7 +509,7 @@
     });
 }
 
-- (unsigned long long)getDiskFreeSize{
+- (unsigned long long)getDiskFreeSize {
     struct statfs buf;
     unsigned long long freespace = -1;
     if(statfs("/var", &buf) >= 0){

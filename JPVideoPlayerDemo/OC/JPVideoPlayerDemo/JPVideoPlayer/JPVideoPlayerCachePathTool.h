@@ -22,14 +22,14 @@ extern NSString * _Nonnull const JPVideoPlayerCacheVideoPathForFullFile;
  *
  *  @return the temporary file path.
  */
-+(nonnull NSString *)videoCachePathForAllTemporaryFile;
++ (nonnull NSString *)videoCachePathForAllTemporaryFile;
 
 /**
  *  Get the local video cache path for all full video file.
  *
  *  @return the full file path.
  */
-+(nonnull NSString *)videoCachePathForAllFullFile;
++ (nonnull NSString *)videoCachePathForAllFullFile;
 
 /**
  *  Get the local video cache path for temporary video file.
@@ -38,7 +38,7 @@ extern NSString * _Nonnull const JPVideoPlayerCacheVideoPathForFullFile;
  *
  *  @return the temporary file path.
  */
-+(nonnull NSString *)videoCacheTemporaryPathForKey:( NSString * _Nonnull )key;
++ (nonnull NSString *)videoCacheTemporaryPathForKey:( NSString * _Nonnull )key;
 
 /**
  *  Get the local video cache path for all full video file.
@@ -47,6 +47,15 @@ extern NSString * _Nonnull const JPVideoPlayerCacheVideoPathForFullFile;
  *
  *  @return the full file path.
  */
-+(nonnull NSString *)videoCacheFullPathForKey:(NSString * _Nonnull)key;
++ (nonnull NSString *)videoCacheFullPathForKey:(NSString * _Nonnull)key;
 
+
+/**
+ Get the cache file name
+
+ @param key The unique flag for the given url in this framework.
+ 
+ @return the cache file name.
+ */
++ (nullable NSString *)cacheFileNameForKey:(nullable NSString *)key;
 @end
