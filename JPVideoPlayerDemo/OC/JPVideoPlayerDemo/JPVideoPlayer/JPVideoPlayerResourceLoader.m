@@ -42,7 +42,7 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
 
 @implementation JPVideoPlayerResourceLoader
 
--(instancetype)init{
+- (instancetype)init{
     self = [super init];
     if (self) {
         self.pendingRequests = [NSMutableArray array];
@@ -54,7 +54,7 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
 #pragma mark -----------------------------------------
 #pragma mark Public
 
--(void)didReceivedDataCacheInDiskByTempPath:(NSString * _Nonnull)tempCacheVideoPath
+- (void)didReceivedDataCacheInDiskByTempPath:(NSString * _Nonnull)tempCacheVideoPath
                         videoFileExceptSize:(NSUInteger)expectedSize
                       videoFileReceivedSize:(NSUInteger)receivedSize {
     
@@ -65,7 +65,7 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
     [self internalPendingRequests];
 }
 
--(void)didCachedVideoDataFinishedFromWebFullVideoCachePath:(NSString * _Nullable)fullVideoCachePath {
+- (void)didCachedVideoDataFinishedFromWebFullVideoCachePath:(NSString * _Nullable)fullVideoCachePath {
     self.tempCacheVideoPath = fullVideoCachePath;
     self.receivedSize = self.expectedSize;
     [self internalPendingRequests];
@@ -75,7 +75,7 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
 #pragma mark -----------------------------------------
 #pragma mark AVAssetResourceLoaderDelegate
 
--(BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest {
+- (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest {
     if (resourceLoader && loadingRequest){
         [self.pendingRequests addObject:loadingRequest];
         [self internalPendingRequests];
@@ -83,7 +83,7 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
     return YES;
 }
 
--(void)resourceLoader:(AVAssetResourceLoader *)resourceLoader didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
+- (void)resourceLoader:(AVAssetResourceLoader *)resourceLoader didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest {
     [self.pendingRequests removeObject:loadingRequest];
 }
 
@@ -154,7 +154,7 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
     return NO;
 }
 
--(void)fillInContentInformation:(AVAssetResourceLoadingContentInformationRequest * _Nonnull)contentInformationRequest{
+- (void)fillInContentInformation:(AVAssetResourceLoadingContentInformationRequest * _Nonnull)contentInformationRequest{
     if (contentInformationRequest) {
         NSString *mimetype = JPVideoPlayerMimeType;
         CFStringRef contentType = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, (__bridge CFStringRef _Nonnull)(mimetype), NULL);

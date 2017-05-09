@@ -55,7 +55,7 @@ extern CGFloat const JPVideoPlayerLayerFrameY;
 @property(nonatomic, strong, readonly, nullable)JPVideoPlayerPlayVideoToolItem *currentPlayVideoItem;
 
 
-# pragma mark - Play video existed in disk.
+#pragma mark - Play video existed in disk.
 
 /**
  * Play the existed video file in disk.
@@ -67,10 +67,14 @@ extern CGFloat const JPVideoPlayerLayerFrameY;
  *
  * @return  token (@see JPVideoPlayerPlayVideoToolItem) that can be passed to -stopPlayVideo: to stop play.
  */
--(nullable JPVideoPlayerPlayVideoToolItem *)playExistedVideoWithURL:(NSURL * _Nullable)url fullVideoCachePath:(NSString * _Nullable)fullVideoCachePath options:(JPVideoPlayerOptions)options showOnView:(UIView * _Nullable)showView error:(nullable JPVideoPlayerPlayVideoToolErrorBlock)error;
+- (nullable JPVideoPlayerPlayVideoToolItem *)playExistedVideoWithURL:(NSURL * _Nullable)url
+                                                 fullVideoCachePath:(NSString * _Nullable)fullVideoCachePath
+                                                            options:(JPVideoPlayerOptions)options
+                                                         showOnView:(UIView * _Nullable)showView
+                                                              error:(nullable JPVideoPlayerPlayVideoToolErrorBlock)error;
 
 
-# pragma mark - Play video from Web.
+#pragma mark - Play video from Web.
 
 /**
  * Play the not existed video file from web.
@@ -83,7 +87,13 @@ extern CGFloat const JPVideoPlayerLayerFrameY;
  *
  * @return  token (@see JPVideoPlayerPlayVideoToolItem) that can be passed to -stopPlayVideo: to stop play.
  */
--(nullable JPVideoPlayerPlayVideoToolItem *)playVideoWithURL:(NSURL * _Nullable)url tempVideoCachePath:(NSString * _Nullable)tempVideoCachePath options:(JPVideoPlayerOptions)options videoFileExceptSize:(NSUInteger)exceptSize videoFileReceivedSize:(NSUInteger)receivedSize showOnView:(UIView * _Nullable)showView error:(nullable JPVideoPlayerPlayVideoToolErrorBlock)error;
+- (nullable JPVideoPlayerPlayVideoToolItem *)playVideoWithURL:(NSURL * _Nullable)url
+                                          tempVideoCachePath:(NSString * _Nullable)tempVideoCachePath
+                                                     options:(JPVideoPlayerOptions)options
+                                         videoFileExceptSize:(NSUInteger)exceptSize
+                                       videoFileReceivedSize:(NSUInteger)receivedSize
+                                                  showOnView:(UIView * _Nullable)showView
+                                                       error:(nullable JPVideoPlayerPlayVideoToolErrorBlock)error;
 
 /**
  * Call this method to make this instance to handle video data for videoplayer.
@@ -92,28 +102,30 @@ extern CGFloat const JPVideoPlayerLayerFrameY;
  * @param expectedSize       The video data total length.
  * @param receivedSize       The video data cached in disk.
  */
--(void)didReceivedDataCacheInDiskByTempPath:(NSString * _Nonnull)tempCacheVideoPath videoFileExceptSize:(NSUInteger)expectedSize videoFileReceivedSize:(NSUInteger)receivedSize;
+- (void)didReceivedDataCacheInDiskByTempPath:(NSString * _Nonnull)tempCacheVideoPath
+                        videoFileExceptSize:(NSUInteger)expectedSize
+                      videoFileReceivedSize:(NSUInteger)receivedSize;
 
 /**
  * Call this method to change the video path from temporary path to full path.
  * 
  * @param fullVideoCachePath the full video file path in disk.
  */
--(void)didCachedVideoDataFinishedFromWebFullVideoCachePath:(NSString * _Nullable)fullVideoCachePath;
+- (void)didCachedVideoDataFinishedFromWebFullVideoCachePath:(NSString * _Nullable)fullVideoCachePath;
 
 
-# pragma mark - Player Control Events
+#pragma mark - Player Control Events
 
 /** 
  * Call this method to control audio is play or not.
  * 
  * @param mute the flag for audio status.
  */
--(void)setMute:(BOOL)mute;
+- (void)setMute:(BOOL)mute;
 
 /**
  * Call this method to stop play video.
  */
--(void)stopPlay;
+- (void)stopPlay;
 
 @end

@@ -23,7 +23,7 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
 
 @interface JPVideoPlayerPlayVideoTool()
 
-@property(nonatomic, strong, nonnull)NSMutableArray<JPVideoPlayerPlayVideoToolItem *> *playVideoItems;
+@property(nonatomic, strong, nonnull) NSMutableArray<JPVideoPlayerPlayVideoToolItem *> *playVideoItems;
 
 @end
 
@@ -38,7 +38,7 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
     return instance;
 }
 
--(instancetype)init{
+- (instancetype)init{
     self = [super init];
     if (self) {
         [self addObserverOnce];
@@ -51,7 +51,11 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
 #pragma mark -----------------------------------------
 #pragma mark Public
 
-- (nullable JPVideoPlayerPlayVideoToolItem *)playExistedVideoWithURL:(NSURL * _Nullable)url fullVideoCachePath:(NSString * _Nullable)fullVideoCachePath options:(JPVideoPlayerOptions)options showOnView:(UIView * _Nullable)showView error:(nullable JPVideoPlayerPlayVideoToolErrorBlock)error{
+- (nullable JPVideoPlayerPlayVideoToolItem *)playExistedVideoWithURL:(NSURL * _Nullable)url
+                                                  fullVideoCachePath:(NSString * _Nullable)fullVideoCachePath
+                                                             options:(JPVideoPlayerOptions)options
+                                                          showOnView:(UIView * _Nullable)showView
+                                                               error:(nullable JPVideoPlayerPlayVideoToolErrorBlock)error {
     
     if (fullVideoCachePath.length==0) {
         if (error) error([NSError errorWithDomain:@"the file path is disable" code:0 userInfo:nil]);
@@ -93,7 +97,7 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
         item.backgroundLayer.frame = CGRectMake(0, 0, showView.bounds.size.width, showView.bounds.size.height);
         item.currentPlayerLayer.frame = item.backgroundLayer.bounds;
         item.error = error;
-        item.playingKey = [[JPVideoPlayerManager sharedManager]cacheKeyForURL:url];
+        item.playingKey = [[JPVideoPlayerManager sharedManager] cacheKeyForURL:url];
     }
     
     if (options & JPVideoPlayerMutedPlay) {
@@ -108,7 +112,7 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
     return item;
 }
 
--(nullable JPVideoPlayerPlayVideoToolItem *)playVideoWithURL:(NSURL * _Nullable)url
+- (nullable JPVideoPlayerPlayVideoToolItem *)playVideoWithURL:(NSURL * _Nullable)url
                                           tempVideoCachePath:(NSString * _Nullable)tempVideoCachePath
                                                      options:(JPVideoPlayerOptions)options
                                          videoFileExceptSize:(NSUInteger)exceptSize
@@ -184,24 +188,24 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
     return item;
 }
 
--(void)didReceivedDataCacheInDiskByTempPath:(NSString * _Nonnull)tempCacheVideoPath
+- (void)didReceivedDataCacheInDiskByTempPath:(NSString * _Nonnull)tempCacheVideoPath
                         videoFileExceptSize:(NSUInteger)expectedSize
                       videoFileReceivedSize:(NSUInteger)receivedSize {
     [self.currentPlayVideoItem.resourceLoader didReceivedDataCacheInDiskByTempPath:tempCacheVideoPath
                                                                videoFileExceptSize:expectedSize videoFileReceivedSize:receivedSize];
 }
 
--(void)didCachedVideoDataFinishedFromWebFullVideoCachePath:(NSString * _Nullable)fullVideoCachePath{
+- (void)didCachedVideoDataFinishedFromWebFullVideoCachePath:(NSString * _Nullable)fullVideoCachePath{
     if (self.currentPlayVideoItem.resourceLoader) {
         [self.currentPlayVideoItem.resourceLoader didCachedVideoDataFinishedFromWebFullVideoCachePath:fullVideoCachePath];
     }
 }
 
--(void)setMute:(BOOL)mute{
+- (void)setMute:(BOOL)mute{
     self.currentPlayVideoItem.player.muted = mute;
 }
 
--(void)stopPlay{
+- (void)stopPlay{
     self.currentPlayVideoItem = nil;
 //    for (JPVideoPlayerPlayVideoToolItem *item in self.playVideoItems) {
 //        [item stopPlayVideo];
@@ -216,7 +220,7 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
 #pragma mark -----------------------------------------
 #pragma mark App Observer
 
--(void)addObserverOnce{
+- (void)addObserverOnce{
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appDidEnterBackground) name:UIApplicationWillResignActiveNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appDidEnterPlayGround) name:UIApplicationDidBecomeActiveNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerItemDidPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
@@ -225,7 +229,7 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(finishedDownload) name:JPVideoPlayerDownloadFinishNotification object:nil];
 }
 
--(void)appReceivedMemoryWarning{
+- (void)appReceivedMemoryWarning{
 //    [self.currentPlayVideoItem stopPlayVideo];
 }
 
@@ -261,7 +265,7 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
     }];
 }
 
--(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context{
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context{
     if ([keyPath isEqualToString:@"status"]) {
         AVPlayerItem *playerItem = (AVPlayerItem *)object;
         AVPlayerItemStatus status = playerItem.status;
@@ -331,19 +335,19 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
 //        [self.currentPlayVideoItem.unownShowView hideActivityIndicatorView];
 //}
 
--(void)setCurrentPlayVideoItem:(JPVideoPlayerPlayVideoToolItem *)currentPlayVideoItem{
+- (void)setCurrentPlayVideoItem:(JPVideoPlayerPlayVideoToolItem *)currentPlayVideoItem{
     [self willChangeValueForKey:@"currentPlayVideoItem"];
     _currentPlayVideoItem = currentPlayVideoItem;
     [self didChangeValueForKey:@"currentPlayVideoItem"];
 }
 
--(NSURL *)handleVideoURL{
+- (NSURL *)handleVideoURL{
     NSURLComponents *components = [[NSURLComponents alloc] initWithURL:[NSURL URLWithString:JPVideoPlayerURL] resolvingAgainstBaseURL:NO];
     components.scheme = JPVideoPlayerURLScheme;
     return [components URL];
 }
 
--(void)displayVideoPicturesOnShowLayer{
+- (void)displayVideoPicturesOnShowLayer{
     if (!self.currentPlayVideoItem.isCancelled) {
         // fixed #26.
         [self.currentPlayVideoItem.backgroundLayer addSublayer:self.currentPlayVideoItem.currentPlayerLayer];

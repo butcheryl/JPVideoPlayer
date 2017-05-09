@@ -52,7 +52,6 @@
 
 @property (strong, nonatomic, readonly, nullable) JPVideoPlayerDownloader *videoDownloader;
 
-
 #pragma mark - Singleton and initialization
 
 /**
@@ -68,7 +67,6 @@
  */
 - (nonnull instancetype)initWithCache:(nonnull JPVideoPlayerCache *)cache
                            downloader:(nonnull JPVideoPlayerDownloader *)downloader NS_DESIGNATED_INITIALIZER;
-
 
 #pragma mark - Video Data Load And Play Video Options
 
@@ -92,7 +90,7 @@
  *
  * @return Returns an NSObject conforming to JPVideoPlayerOperation. Should be an instance of JPVideoPlayerDownloaderOperation.
  */
-- (nullable id <JPVideoPlayerOperation>)loadVideoWithURL:(nullable NSURL *)url
+- (nullable id <JPVideoPlayerOperation>)loadVideoWithURL:(nonnull NSURL *)url
                                               showOnView:(nullable UIView *)showView
                                                  options:(JPVideoPlayerOptions)options
                                                 progress:(nullable JPVideoPlayerDownloaderProgressBlock)progressBlock

@@ -23,7 +23,8 @@
  * @param receivedSize       The video data cached in disk.
  */
 - (void)didReceivedDataCacheInDiskByTempPath:(NSString * _Nonnull)tempCacheVideoPath
-                        videoFileExceptSize:(NSUInteger)expectedSize videoFileReceivedSize:(NSUInteger)receivedSize;
+                         videoFileExceptSize:(NSUInteger)expectedSize
+                       videoFileReceivedSize:(NSUInteger)receivedSize;
 
 /**
  * Call this method to change the video path from temporary path to full path.

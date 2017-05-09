@@ -26,7 +26,7 @@ typedef NSMutableDictionary<NSString *, id> JPCallbacksDictionary;
 
 @interface JPVideoPlayerDownloaderOperation()
 
-@property (strong, nonatomic, nonnull)NSMutableArray<JPCallbacksDictionary *> *callbackBlocks;
+@property (strong, nonatomic, nonnull) NSMutableArray<JPCallbacksDictionary *> *callbackBlocks;
 
 @property (assign, nonatomic, getter = isExecuting)BOOL executing;
 
@@ -135,12 +135,12 @@ typedef NSMutableDictionary<NSString *, id> JPCallbacksDictionary;
                     sself.backgroundTaskId = UIBackgroundTaskInvalid;
                 }
             }];
-        }
-        else{
+        } else {
             return;
         }
         
         NSURLSession *session = self.unownedSession;
+        
         if (!self.unownedSession) {
             NSURLSessionConfiguration *sessionConfig = [NSURLSessionConfiguration defaultSessionConfiguration];
             sessionConfig.timeoutIntervalForRequest = 15;
