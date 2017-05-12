@@ -107,18 +107,24 @@
     return [self addProgressCallback:progressBlock completedBlock:errorBlock forURL:url createCallback:^JPVideoPlayerDownloaderOperation *{
         
         __strong __typeof (weakSelf) sself = weakSelf ;
+        
         NSTimeInterval timeoutInterval = sself.downloadTimeout;
+        
         if (timeoutInterval == 0.0) {
             timeoutInterval = 15.0;
         }
         
         // In order to prevent from potential duplicate caching (NSURLCache + JPVideoPlayerCache) we disable the cache for image requests if told otherwise.
         NSURLComponents *actualURLComponents = [[NSURLComponents alloc] initWithURL:url resolvingAgainstBaseURL:NO];
+        
         actualURLComponents.scheme = url.scheme;
+        
         NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[actualURLComponents URL] cachePolicy:(NSURLRequestReloadIgnoringLocalCacheData) timeoutInterval:timeoutInterval];
         
         request.HTTPShouldHandleCookies = (options & JPVideoPlayerDownloaderHandleCookies);
+        
         request.HTTPShouldUsePipelining = YES;
+        
         if (sself.headersFilter) {
             request.allHTTPHeaderFields = sself.headersFilter(url, [sself.HTTPHeaders copy]);
         }
@@ -127,8 +133,7 @@
         
         if (sself.urlCredential) {
             operation.credential = sself.urlCredential;
-        }
-        else if (sself.username && sself.password) {
+        } else if (sself.username && sself.password) {
             operation.credential = [NSURLCredential credentialWithUser:sself.username password:sself.password persistence:NSURLCredentialPersistenceForSession];
         }
         
@@ -156,7 +161,10 @@
 #pragma mark -----------------------------------------
 #pragma mark Private
 
-- (nullable JPVideoPlayerDownloadToken *)addProgressCallback:(JPVideoPlayerDownloaderProgressBlock)progressBlock completedBlock:(JPVideoPlayerDownloaderErrorBlock)errorBlock forURL:(nullable NSURL *)url createCallback:(JPVideoPlayerDownloaderOperation *(^)())createCallback {
+- (nullable JPVideoPlayerDownloadToken *)addProgressCallback:(JPVideoPlayerDownloaderProgressBlock)progressBlock
+                                              completedBlock:(JPVideoPlayerDownloaderErrorBlock)errorBlock
+                                                      forURL:(nullable NSURL *)url
+                                              createCallback:(JPVideoPlayerDownloaderOperation *(^)())createCallback {
     
     // The URL will be used as the key to the callbacks dictionary so it cannot be nil. If it is nil immediately call the completed block with no video or data.
     if (url == nil) {
@@ -169,27 +177,32 @@
     __block JPVideoPlayerDownloadToken *token = nil;
     
     dispatch_barrier_sync(self.barrierQueue, ^{
+        
         JPVideoPlayerDownloaderOperation *operation = self.URLOperations[url];
+        
         if (!operation) {
             operation = createCallback();
+            
             self.URLOperations[url] = operation;
             
             __weak JPVideoPlayerDownloaderOperation *woperation = operation;
+            
             operation.completionBlock = ^{
                 JPVideoPlayerDownloaderOperation *soperation = woperation;
+                
                 if (!soperation) return;
-                if (self.URLOperations.allKeys.count>0) {
-                    if (self.URLOperations[url] == soperation) {
-                        [self.URLOperations removeObjectForKey:url];
-                    };
+                
+                if (self.URLOperations.allKeys.count > 0 && self.URLOperations[url] == soperation) {
+                    [self.URLOperations removeObjectForKey:url];
                 }
             };
         }
-        id downloadOperationCancelToken = [operation addHandlersForProgress:progressBlock error:errorBlock];
         
-        token = [JPVideoPlayerDownloadToken new];
+        token = [[JPVideoPlayerDownloadToken alloc] init];
+        
         token.url = url;
-        token.downloadOperationCancelToken = downloadOperationCancelToken;
+        
+        token.downloadOperationCancelToken = [operation addHandlersForProgress:progressBlock error:errorBlock];
     });
     
     return token;

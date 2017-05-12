@@ -57,7 +57,7 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
                                                           showOnView:(UIView * _Nullable)showView
                                                                error:(nullable JPVideoPlayerPlayVideoToolErrorBlock)error {
     
-    if (fullVideoCachePath.length==0) {
+    if (fullVideoCachePath.length == 0) {
         if (error) error([NSError errorWithDomain:@"the file path is disable" code:0 userInfo:nil]);
         return nil;
     }
@@ -67,38 +67,35 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
         return nil;
     }
     
-    JPVideoPlayerPlayVideoToolItem *item = [JPVideoPlayerPlayVideoToolItem new];
-    item.unownShowView = showView;
     NSURL *videoPathURL = [NSURL fileURLWithPath:fullVideoCachePath];
+    
     AVURLAsset *videoURLAsset = [AVURLAsset URLAssetWithURL:videoPathURL options:nil];
+    
     AVPlayerItem *playerItem = [AVPlayerItem playerItemWithAsset:videoURLAsset];
-    {
-        item.url = url;
-        item.currentPlayerItem = playerItem;
-        [playerItem addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:nil];
-        [playerItem addObserver:self forKeyPath:@"loadedTimeRanges" options:NSKeyValueObservingOptionNew context:nil];
-        
-        item.player = [AVPlayer playerWithPlayerItem:playerItem];
-        item.currentPlayerLayer = [AVPlayerLayer playerLayerWithPlayer:item.player];
-        {
-            NSString *videoGravity = nil;
-            if (options&JPVideoPlayerLayerVideoGravityResizeAspect) {
-                videoGravity = AVLayerVideoGravityResizeAspect;
-            }
-            else if (options&JPVideoPlayerLayerVideoGravityResize){
-                videoGravity = AVLayerVideoGravityResize;
-            }
-            else if (options&JPVideoPlayerLayerVideoGravityResizeAspectFill){
-                videoGravity = AVLayerVideoGravityResizeAspectFill;
-            }
-            item.currentPlayerLayer.videoGravity = videoGravity;
-        }
-        
-        item.backgroundLayer.frame = CGRectMake(0, 0, showView.bounds.size.width, showView.bounds.size.height);
-        item.currentPlayerLayer.frame = item.backgroundLayer.bounds;
-        item.error = error;
-        item.playingKey = [[JPVideoPlayerManager sharedManager] cacheKeyForURL:url];
+    [playerItem addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:nil];
+    [playerItem addObserver:self forKeyPath:@"loadedTimeRanges" options:NSKeyValueObservingOptionNew context:nil];
+    
+    JPVideoPlayerPlayVideoToolItem *item = [[JPVideoPlayerPlayVideoToolItem alloc] init];
+    item.unownShowView = showView;
+    item.url = url;
+    item.currentPlayerItem = playerItem;
+    item.player = [AVPlayer playerWithPlayerItem:playerItem];
+    item.currentPlayerLayer = [AVPlayerLayer playerLayerWithPlayer:item.player];
+    item.backgroundLayer.frame = CGRectMake(0, 0, showView.bounds.size.width, showView.bounds.size.height);
+    item.currentPlayerLayer.frame = item.backgroundLayer.bounds;
+    item.error = error;
+    item.playingKey = [[JPVideoPlayerManager sharedManager] cacheKeyForURL:url];
+    
+    NSString *videoGravity = nil;
+    if (options & JPVideoPlayerLayerVideoGravityResizeAspect) {
+        videoGravity = AVLayerVideoGravityResizeAspect;
+    } else if (options & JPVideoPlayerLayerVideoGravityResize){
+        videoGravity = AVLayerVideoGravityResize;
+    } else if (options & JPVideoPlayerLayerVideoGravityResizeAspectFill){
+        videoGravity = AVLayerVideoGravityResizeAspectFill;
     }
+    
+    item.currentPlayerLayer.videoGravity = videoGravity;
     
     if (options & JPVideoPlayerMutedPlay) {
         item.player.muted = YES;
@@ -107,6 +104,7 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
     @synchronized (self) {
         [self.playVideoItems addObject:item];
     }
+    
     self.currentPlayVideoItem = item;
     
     return item;
@@ -120,7 +118,7 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
                                                   showOnView:(UIView * _Nullable)showView
                                                        error:(nullable JPVideoPlayerPlayVideoToolErrorBlock)error {
     
-    if (tempVideoCachePath.length==0) {
+    if (tempVideoCachePath.length == 0) {
         if (error) error([NSError errorWithDomain:@"the file path is disable" code:0 userInfo:nil]);
         return nil;
     }

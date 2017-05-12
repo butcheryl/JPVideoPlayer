@@ -156,8 +156,7 @@
                                     }
                                 }
                             }];
-                        }
-                        else {
+                        } else {
                             NSString *key = [[JPVideoPlayerManager sharedManager] cacheKeyForURL:targetURL];
                             if ([JPVideoPlayerPlayVideoTool sharedTool].currentPlayVideoItem && [key isEqualToString:[JPVideoPlayerPlayVideoTool sharedTool].currentPlayVideoItem.playingKey]) {
                                 [[JPVideoPlayerPlayVideoTool sharedTool] didReceivedDataCacheInDiskByTempPath:tempVideoCachedPath videoFileExceptSize:expectedSize videoFileReceivedSize:receivedSize];

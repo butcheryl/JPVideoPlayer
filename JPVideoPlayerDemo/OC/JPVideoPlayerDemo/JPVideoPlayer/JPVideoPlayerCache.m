@@ -130,9 +130,9 @@
         
         if (!targetToken) {
             NSString *path = [JPVideoPlayerCachePathTool videoCacheTemporaryPathForKey:key];
-            NSOutputStream *stream = [[NSOutputStream alloc]initToFileAtPath:path append:YES];
+            NSOutputStream *stream = [[NSOutputStream alloc] initToFileAtPath:path append:YES];
             [stream open];
-            JPVideoPlayerCacheToken *token = [JPVideoPlayerCacheToken new];
+            JPVideoPlayerCacheToken *token = [[JPVideoPlayerCacheToken alloc] init];
             token.key = key;
             token.outputStream = stream;
             [self.outputStreams addObject:token];
@@ -155,25 +155,25 @@
                     [fileURL setResourceValue:@YES forKey:NSURLIsExcludedFromBackupKey error:nil];
                 }
                 
-                if (completionBlock) {
-                    NSString *fullVideoCachePath = nil;
-                    NSError *error = nil;
-                    if (targetToken.receivedVideoSize==expectedSize) {
-                        fullVideoCachePath = [JPVideoPlayerCachePathTool videoCacheFullPathForKey:key];
-                        [_fileManager moveItemAtPath:tempVideoCachePath toPath:fullVideoCachePath error:&error];
-                    }
-                    
+                NSString *fullVideoCachePath = nil;
+                
+                NSError *error = nil;
+                
+                if (targetToken.receivedVideoSize == expectedSize) {
+                    fullVideoCachePath = [JPVideoPlayerCachePathTool videoCacheFullPathForKey:key];
+                    [_fileManager moveItemAtPath:tempVideoCachePath toPath:fullVideoCachePath error:&error];
+                }
+                
+                if (self.completionBlockEnable && completionBlock) {
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        if (self.completionBlockEnable) {
-                            completionBlock(targetToken.receivedVideoSize, error, fullVideoCachePath);
-                        }
+                        completionBlock(targetToken.receivedVideoSize, error, fullVideoCachePath);
                     });
                 }
                 
                 // cache temporary video data finished.
                 // close the stream.
                 // remove the cache operation.
-                if (targetToken.receivedVideoSize==expectedSize) {
+                if (targetToken.receivedVideoSize == expectedSize) {
                     [targetToken.outputStream close];
                     [self.outputStreams removeObject:targetToken];
                     self.completionBlockEnable = NO;

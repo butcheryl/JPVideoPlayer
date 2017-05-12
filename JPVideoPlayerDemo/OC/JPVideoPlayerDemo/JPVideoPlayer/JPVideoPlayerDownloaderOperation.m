@@ -57,7 +57,7 @@ typedef NSMutableDictionary<NSString *, id> JPCallbacksDictionary;
 @synthesize executing = _executing;
 @synthesize finished = _finished;
 
-- (nonnull instancetype)init{
+- (nonnull instancetype)init {
     return [self initWithRequest:nil inSession:nil options:0];
 }
 
@@ -84,10 +84,13 @@ typedef NSMutableDictionary<NSString *, id> JPCallbacksDictionary;
 
 - (nullable id)addHandlersForProgress:(nullable JPVideoPlayerDownloaderProgressBlock)progressBlock error:(nullable JPVideoPlayerDownloaderErrorBlock)errorBlock{
     
-    JPCallbacksDictionary *callbacks = [NSMutableDictionary new];
+    JPCallbacksDictionary *callbacks = [NSMutableDictionary dictionary];
     
-    if (progressBlock) callbacks[kProgressCallbackKey] = [progressBlock copy];
-    if (errorBlock) callbacks[kErrorCallbackKey] = [errorBlock copy];
+    if (progressBlock)
+        callbacks[kProgressCallbackKey] = [progressBlock copy];
+    
+    if (errorBlock)
+        callbacks[kErrorCallbackKey] = [errorBlock copy];
     
     dispatch_barrier_async(self.barrierQueue, ^{
         [self.callbackBlocks addObject:callbacks];
@@ -281,11 +284,11 @@ typedef NSMutableDictionary<NSString *, id> JPCallbacksDictionary;
         if (self.completionBlock) {
             self.completionBlock();
         }
-    }
-    else{
+    } else {
         dispatch_main_async_safe(^{
             [[NSNotificationCenter defaultCenter] postNotificationName:JPVideoPlayerDownloadStopNotification object:self];
         });
+        
         [self callErrorBlocksWithError:error];
     }
     
