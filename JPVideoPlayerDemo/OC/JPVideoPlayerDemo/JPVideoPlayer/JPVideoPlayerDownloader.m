@@ -59,16 +59,17 @@
          *  We send nil as delegate queue so that the session creates a serial operation queue for performing all delegate
          *  method calls and completion handler calls.
          */
-        // self.session = [NSURLSession sessionWithConfiguration:sessionConfiguration delegate:self delegateQueue:nil];
+//         self.session = [NSURLSession sessionWithConfiguration:sessionConfiguration delegate:self delegateQueue:nil];
     }
     return self;
 }
 
 - (void)dealloc {
     [self.session invalidateAndCancel];
-    self.session = nil;
     
     [self.downloadQueue cancelAllOperations];
+    
+    self.session = nil;
 }
 
 

@@ -55,17 +55,17 @@
 }
 
 - (void)pausePlayVideo {
-    [self.player pause];
     if ([self.unownShowView respondsToSelector:@selector(videoItem:statusChange:)]) {
         [self.unownShowView videoItem:self statusChange:JPPlaybackStatusPause];
     }
+    [self.player pause];
 }
 
 - (void)resumePlayVideo {
-    [self.player play];
     if ([self.unownShowView respondsToSelector:@selector(videoItem:statusChange:)]) {
-        [self.unownShowView videoItem:self statusChange:JPPlaybackStatusp];
+        [self.unownShowView videoItem:self statusChange:JPPlaybackStatusResume];
     }
+    [self.player play];
 }
 
 - (void)reset {
@@ -92,7 +92,7 @@
     _resourceLoader = nil;
 }
 
--(CALayer *)backgroundLayer{
+-(CALayer *)backgroundLayer {
     if (!_backgroundLayer) {
         _backgroundLayer = [CALayer new];
         _backgroundLayer.backgroundColor = [UIColor blackColor].CGColor;

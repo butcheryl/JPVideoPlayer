@@ -14,32 +14,10 @@
 #import "JPVideoPlayerDefine.h"
 #import "JPPlaybackControlsProtocol.h"
 
-extern CGFloat const JPVideoPlayerLayerFrameY;
-
-
-
 @class JPVideoPlayerPlayVideoTool;
 @class JPVideoPlayerPlayVideoToolItem;
 
-@protocol JPVideoPlayerPlayVideoToolDelegate <NSObject>
-
-@optional
-
-/**
- * Controls which video should automatic replay when the video is play completed.
- *
- * @param videoTool     the current `JPVideoPlayerPlayVideoTool`.
- * @param videoURL      the url of the video to be play.
- *
- * @return Return NO to prevent replay for the video. If not implemented, YES is implied.
- */
--(BOOL)playVideoTool:(nonnull JPVideoPlayerPlayVideoTool *)videoTool shouldAutoReplayVideoForURL:(nonnull NSURL *)videoURL;
-
-@end
-
 @interface JPVideoPlayerPlayVideoTool : NSObject
-
-@property(nullable, nonatomic, weak)id<JPVideoPlayerPlayVideoToolDelegate> delegate;
 
 /**
  * Singleton method, returns the shared instance.

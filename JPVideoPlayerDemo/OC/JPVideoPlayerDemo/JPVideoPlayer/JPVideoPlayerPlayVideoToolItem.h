@@ -15,12 +15,6 @@
 @interface JPVideoPlayerPlayVideoToolItem : NSObject
 
 /**
- * The current playing url key.
- */
-//@property(nonatomic, strong, readonly, nonnull)NSString *playingKey;
-
-
-/**
  * The playing URL
  */
 @property(nonatomic, strong, nullable, readonly) NSURL *url;

@@ -29,8 +29,8 @@
         case JPPlaybackStatusBegan:
             NSLog(@"video start");
             break;
-        case JPPlaybackStatusBuffer:
-            NSLog(@"video buffer");
+        case JPPlaybackStatusLoading:
+            NSLog(@"video Loading");
             break;
         default:
             break;

@@ -138,10 +138,10 @@
 			children = (
 				39BCE6DB1EC0165200ED3766 /* JPVideoPlayerPlayVideoTool.h */,
 				39BCE6DC1EC0165200ED3766 /* JPVideoPlayerPlayVideoTool.m */,
-				5F9E0A151E6955CA00D20B29 /* JPVideoPlayerResourceLoader.h */,
-				5F9E0A161E6955CA00D20B29 /* JPVideoPlayerResourceLoader.m */,
 				39BCE6DE1EC018AF00ED3766 /* JPVideoPlayerPlayVideoToolItem.h */,
 				39BCE6DF1EC018AF00ED3766 /* JPVideoPlayerPlayVideoToolItem.m */,
+				5F9E0A151E6955CA00D20B29 /* JPVideoPlayerResourceLoader.h */,
+				5F9E0A161E6955CA00D20B29 /* JPVideoPlayerResourceLoader.m */,
 			);
 			name = Tool;
 			sourceTree = "<group>";
