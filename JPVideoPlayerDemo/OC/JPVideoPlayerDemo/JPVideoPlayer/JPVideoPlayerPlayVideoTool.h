@@ -11,9 +11,8 @@
 
 
 #import <UIKit/UIKit.h>
-#import <AVFoundation/AVFoundation.h>
-#import "JPVideoPlayerManager.h"
 #import "JPVideoPlayerDefine.h"
+#import "JPPlaybackControlsProtocol.h"
 
 extern CGFloat const JPVideoPlayerLayerFrameY;
 
@@ -52,7 +51,7 @@ extern CGFloat const JPVideoPlayerLayerFrameY;
 /**
  * The current play video item.
  */
-@property(nonatomic, strong, readonly, nullable)JPVideoPlayerPlayVideoToolItem *currentPlayVideoItem;
+@property(nonatomic, strong, readonly, nullable) JPVideoPlayerPlayVideoToolItem *currentPlayVideoItem;
 
 
 #pragma mark - Play video existed in disk.

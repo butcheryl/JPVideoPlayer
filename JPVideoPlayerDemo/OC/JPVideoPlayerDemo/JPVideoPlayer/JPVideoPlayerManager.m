@@ -66,7 +66,7 @@
 #pragma mark Public
 
 - (nullable id <JPVideoPlayerOperation>)loadVideoWithURL:(nonnull NSURL *)url
-                                              showOnView:(nullable UIView *)showView
+                                              showOnView:(nullable UIView<JPPlaybackControlsProtocol> *)showView
                                                  options:(JPVideoPlayerOptions)options
                                                 progress:(nullable JPVideoPlayerDownloaderProgressBlock)progressBlock
                                                completed:(nullable JPVideoPlayerCompletionBlock)completedBlock {
@@ -217,7 +217,7 @@
 }
 
 - (nullable id<JPVideoPlayerOperation>)loadLocalVideoWithURL:(nullable NSURL *)url
-                                                  showOnView:(nullable UIView *)showView
+                                                  showOnView:(nullable UIView<JPPlaybackControlsProtocol> *)showView
                                                      options:(JPVideoPlayerOptions)options
                                                     progress:(nullable JPVideoPlayerDownloaderProgressBlock)progressBlock
                                                    completed:(nullable JPVideoPlayerCompletionBlock)completedBlock {

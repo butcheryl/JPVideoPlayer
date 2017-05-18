@@ -15,38 +15,11 @@
 #import "JPVideoPlayerCache.h"
 #import "JPVideoPlayerOperation.h"
 #import "JPVideoPlayerDefine.h"
+#import "JPPlaybackControlsProtocol.h"
 
 @class JPVideoPlayerManager;
 
-@protocol JPVideoPlayerManagerDelegate <NSObject>
-
-@optional
-
-/**
- * Controls which video should be downloaded when the video is not found in the cache.
- *
- * @param videoPlayerManager The current `JPVideoPlayerManager`.
- * @param videoURL           The url of the video to be downloaded.
- *
- * @return Return NO to prevent the downloading of the video on cache misses. If not implemented, YES is implied.
- */
-- (BOOL)videoPlayerManager:(nonnull JPVideoPlayerManager *)videoPlayerManager shouldDownloadVideoForURL:(nullable NSURL *)videoURL;
-
-/**
- * Controls which video should automatic replay when the video is play completed.
- *
- * @param videoPlayerManager The current `JPVideoPlayerManager`.
- * @param videoURL  the url of the video to be play.
- *
- * @return Return NO to prevent replay for the video. If not implemented, YES is implied.
- */
-- (BOOL)videoPlayerManager:(nonnull JPVideoPlayerManager *)videoPlayerManager shouldAutoReplayForURL:(nullable NSURL *)videoURL;
-
-@end
-
 @interface JPVideoPlayerManager : NSObject
-
-@property (weak, nonatomic, nullable) id <JPVideoPlayerManagerDelegate> delegate;
 
 @property (strong, nonatomic, readonly, nullable) JPVideoPlayerCache *videoCache;
 
@@ -91,7 +64,7 @@
  * @return Returns an NSObject conforming to JPVideoPlayerOperation. Should be an instance of JPVideoPlayerDownloaderOperation.
  */
 - (nullable id <JPVideoPlayerOperation>)loadVideoWithURL:(nonnull NSURL *)url
-                                              showOnView:(nullable UIView *)showView
+                                              showOnView:(nullable UIView<JPPlaybackControlsProtocol> *)showView
                                                  options:(JPVideoPlayerOptions)options
                                                 progress:(nullable JPVideoPlayerDownloaderProgressBlock)progressBlock
                                                completed:(nullable JPVideoPlayerCompletionBlock)completedBlock;

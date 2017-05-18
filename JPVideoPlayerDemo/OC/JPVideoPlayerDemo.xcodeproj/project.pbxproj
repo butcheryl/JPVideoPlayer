@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		394F211C1EC407DD00C3A89E /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 394F211B1EC407DD00C3A89E /* RootViewController.m */; };
+		395F6E751ECD809D00024ADB /* JPVideoPreLoadDuration.m in Sources */ = {isa = PBXBuildFile; fileRef = 395F6E741ECD809D00024ADB /* JPVideoPreLoadDuration.m */; };
 		39BCE6D81EC012A700ED3766 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 39BCE6D71EC012A700ED3766 /* Main.storyboard */; };
 		39BCE6DA1EC0144400ED3766 /* JPVideoPlayer.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 39BCE6D91EC0144400ED3766 /* JPVideoPlayer.podspec */; };
 		39BCE6DD1EC0165200ED3766 /* JPVideoPlayerPlayVideoTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 39BCE6DC1EC0165200ED3766 /* JPVideoPlayerPlayVideoTool.m */; };
@@ -34,6 +35,9 @@
 		1F5F3C3412F93A0936D3FBB0 /* Pods-JPVideoPlayerDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JPVideoPlayerDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-JPVideoPlayerDemo/Pods-JPVideoPlayerDemo.release.xcconfig"; sourceTree = "<group>"; };
 		394F211A1EC407DD00C3A89E /* RootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootViewController.h; sourceTree = "<group>"; };
 		394F211B1EC407DD00C3A89E /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootViewController.m; sourceTree = "<group>"; };
+		395F6E711ECD7C5F00024ADB /* JPPlaybackControlsProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JPPlaybackControlsProtocol.h; sourceTree = "<group>"; };
+		395F6E731ECD809D00024ADB /* JPVideoPreLoadDuration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JPVideoPreLoadDuration.h; sourceTree = "<group>"; };
+		395F6E741ECD809D00024ADB /* JPVideoPreLoadDuration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JPVideoPreLoadDuration.m; sourceTree = "<group>"; };
 		39BCE6D71EC012A700ED3766 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		39BCE6D91EC0144400ED3766 /* JPVideoPlayer.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = JPVideoPlayer.podspec; path = ../../../JPVideoPlayer.podspec; sourceTree = "<group>"; };
 		39BCE6DB1EC0165200ED3766 /* JPVideoPlayerPlayVideoTool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JPVideoPlayerPlayVideoTool.h; sourceTree = "<group>"; };
@@ -91,6 +95,16 @@
 				1F5F3C3412F93A0936D3FBB0 /* Pods-JPVideoPlayerDemo.release.xcconfig */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		395F6E721ECD7C6700024ADB /* ControlsProtocol */ = {
+			isa = PBXGroup;
+			children = (
+				395F6E711ECD7C5F00024ADB /* JPPlaybackControlsProtocol.h */,
+				395F6E731ECD809D00024ADB /* JPVideoPreLoadDuration.h */,
+				395F6E741ECD809D00024ADB /* JPVideoPreLoadDuration.m */,
+			);
+			name = ControlsProtocol;
 			sourceTree = "<group>";
 		};
 		39BCE6E21EC0225000ED3766 /* Cache */ = {
@@ -194,6 +208,7 @@
 				39BCE6E31EC025D500ED3766 /* Download */,
 				39BCE6E41EC025F300ED3766 /* Tool */,
 				39BCE6E81EC05A0C00ED3766 /* Operation */,
+				395F6E721ECD7C6700024ADB /* ControlsProtocol */,
 				39BCE6E11EC0213200ED3766 /* JPVideoPlayerDefine.h */,
 				5F9E0A0B1E6955CA00D20B29 /* JPVideoPlayerCompat.h */,
 				5F9E0A101E6955CA00D20B29 /* JPVideoPlayerManager.h */,
@@ -341,6 +356,7 @@
 				5F9E0A271E6955CA00D20B29 /* JPVideoPlayerDownloaderOperation.m in Sources */,
 				5F9E0A231E6955CA00D20B29 /* JPVideoPlayerCache.m in Sources */,
 				5F9E0A281E6955CA00D20B29 /* JPVideoPlayerManager.m in Sources */,
+				395F6E751ECD809D00024ADB /* JPVideoPreLoadDuration.m in Sources */,
 				39BCE6DD1EC0165200ED3766 /* JPVideoPlayerPlayVideoTool.m in Sources */,
 				5F9E0A241E6955CA00D20B29 /* JPVideoPlayerCacheConfig.m in Sources */,
 				394F211C1EC407DD00C3A89E /* RootViewController.m in Sources */,

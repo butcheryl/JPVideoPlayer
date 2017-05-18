@@ -10,6 +10,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import "JPVideoPlayerResourceLoader.h"
 #import "JPVideoPlayerDefine.h"
+#import "JPPlaybackControlsProtocol.h"
 
 @interface JPVideoPlayerPlayVideoToolItem : NSObject
 
@@ -22,37 +23,37 @@
 /**
  * The playing URL
  */
-@property(nonatomic, strong, nullable) NSURL *url;
+@property(nonatomic, strong, nullable, readonly) NSURL *url;
 
 /**
  * The Player to play video.
  */
-@property(nonatomic, strong, nullable) AVPlayer *player;
+@property(nonatomic, strong, nullable, readonly) AVPlayer *player;
 
 /**
  * The current player's layer.
  */
-@property(nonatomic, strong, nullable) AVPlayerLayer *currentPlayerLayer;
+@property(nonatomic, strong, nullable, readonly) AVPlayerLayer *currentPlayerLayer;
 
 /**
  * The background layer for video layer.
  */
-@property(nonatomic, strong, nullable) CALayer *backgroundLayer;
+@property(nonatomic, strong, nullable, readonly) CALayer *backgroundLayer;
 
 /**
  * The current player's item.
  */
-@property(nonatomic, strong, nullable) AVPlayerItem *currentPlayerItem;
+@property(nonatomic, strong, nullable, readonly) AVPlayerItem *currentPlayerItem;
 
 /**
  * The current player's urlAsset.
  */
-@property(nonatomic, strong, nullable) AVURLAsset *videoURLAsset;
+@property(nonatomic, strong, nullable, readonly) AVURLAsset *videoURLAsset;
 
 /**
  * The view of the video picture will show on.
  */
-@property(nonatomic, weak, nullable) UIView *unownShowView;
+@property(nonatomic, weak, nullable) UIView<JPPlaybackControlsProtocol> *unownShowView;
 
 /**
  * A flag to book is cancel play or not.
@@ -83,4 +84,13 @@
  * The last play time for player.
  */
 @property(nonatomic, assign) NSTimeInterval lastTime;
+
+
+- (nonnull instancetype)initWithURL:(nonnull NSURL *)videoURL playingKey:(nonnull NSString *)playingKey;
+
+- (nonnull instancetype)initWithURL:(nonnull NSURL *)videoURL assetURL:(nullable NSURL *)assetURL playingKey:(nonnull NSString *)playingKey;
+
+- (void)stopPlayVideo;
+- (void)pausePlayVideo;
+- (void)resumePlayVideo;
 @end

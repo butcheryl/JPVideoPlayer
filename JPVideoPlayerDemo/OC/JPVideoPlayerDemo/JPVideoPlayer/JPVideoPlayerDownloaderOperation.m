@@ -168,13 +168,13 @@ typedef NSMutableDictionary<NSString *, id> JPCallbacksDictionary;
         dispatch_main_async_safe(^{
             [[NSNotificationCenter defaultCenter] postNotificationName:JPVideoPlayerDownloadStartNotification object:self];
         });
+        
         @autoreleasepool {
             for (JPVideoPlayerDownloaderProgressBlock progressBlock in [self callbacksForKey:kProgressCallbackKey]) {
                 progressBlock(nil, 0, NSURLResponseUnknownLength, nil, self.request.URL);
             }
         }
-    }
-    else {
+    } else {
         [self callErrorBlocksWithError:[NSError errorWithDomain:NSURLErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey : @"Connection can't be initialized"}]];
     }
     

@@ -8,9 +8,38 @@
 
 #import "RootViewController.h"
 #import "JPVideoPlayerManager.h"
+#import "JPVideoPreLoadDuration.h"
+
+
+@interface BYPlayerView : UIImageView <JPPlaybackControlsProtocol>
+
+@end
+
+@implementation BYPlayerView
+- (JPVideoPreLoadDuration *)videoPreLoadDuration {
+    return JPVideoPreLoadDuration.second(5);
+//    return JPVideoPreLoadDuration.minute(1);
+//    return JPVideoPreLoadDuration.without;
+//    return JPVideoPreLoadDuration.ratio(0.3);
+//    return JPVideoPreLoadDuration.defaultTime;
+}
+
+- (void)videoPlaybackStatusChange:(JPPlaybackStatus)status {
+    switch (status) {
+        case JPPlaybackStatusBegan:
+            NSLog(@"video start");
+            break;
+        case JPPlaybackStatusBuffer:
+            NSLog(@"video buffer");
+            break;
+        default:
+            break;
+    }
+}
+@end
 
 @interface RootViewController ()
-@property (nonatomic, strong) UIImageView *playerView;
+@property (nonatomic, strong) BYPlayerView *playerView;
 @end
 
 @implementation RootViewController
@@ -18,7 +47,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    self.playerView = [[UIImageView alloc] init];
+    self.playerView = [[BYPlayerView alloc] init];
     self.playerView.backgroundColor = [UIColor lightGrayColor];
     [self.view addSubview:self.playerView];
     
@@ -36,6 +65,8 @@
                                                       NSLog(@"%@", error);
                                                       NSLog(@"%@", fullVideoCachePath);
                                                   }];
+
+    
 }
 
 - (void)viewDidLayoutSubviews {

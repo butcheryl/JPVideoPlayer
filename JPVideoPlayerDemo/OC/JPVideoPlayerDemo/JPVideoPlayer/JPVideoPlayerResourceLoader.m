@@ -43,8 +43,7 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
 @implementation JPVideoPlayerResourceLoader
 
 - (instancetype)init{
-    self = [super init];
-    if (self) {
+    if (self = [super init]) {
         self.pendingRequests = [NSMutableArray array];
     }
     return self;
@@ -55,8 +54,8 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
 #pragma mark Public
 
 - (void)didReceivedDataCacheInDiskByTempPath:(NSString * _Nonnull)tempCacheVideoPath
-                        videoFileExceptSize:(NSUInteger)expectedSize
-                      videoFileReceivedSize:(NSUInteger)receivedSize {
+                         videoFileExceptSize:(NSUInteger)expectedSize
+                       videoFileReceivedSize:(NSUInteger)receivedSize {
     
     self.tempCacheVideoPath = tempCacheVideoPath;
     self.expectedSize = expectedSize;
@@ -68,6 +67,7 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
 - (void)didCachedVideoDataFinishedFromWebFullVideoCachePath:(NSString * _Nullable)fullVideoCachePath {
     self.tempCacheVideoPath = fullVideoCachePath;
     self.receivedSize = self.expectedSize;
+    
     [self internalPendingRequests];
 }
 
@@ -98,27 +98,33 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
     // Then judge the download file data is contain the loadingRequest's data or not, if Yes, take out the request's data and return to loadingRequest, next to colse this loadingRequest. if No, continue wait for download finished.
     
     NSError *error;
+    
     NSData *tempVideoData = [NSData dataWithContentsOfFile:_tempCacheVideoPath options:NSDataReadingMappedIfSafe error:&error];
+    
     if (!error) {
         NSMutableArray *requestsCompleted = [NSMutableArray array];
+        
         @autoreleasepool {
             for (AVAssetResourceLoadingRequest *loadingRequest in self.pendingRequests) {
+                
                 [self fillInContentInformation:loadingRequest.contentInformationRequest];
                 
                 BOOL didRespondFinished = [self respondWithDataForRequest:loadingRequest andTempVideoData:tempVideoData];
+                
                 if (didRespondFinished) {
                     [requestsCompleted addObject:loadingRequest];
                     [loadingRequest finishLoading];
                 }
             }
         }
+        
         if (requestsCompleted.count) {
             [self.pendingRequests removeObjectsInArray:[requestsCompleted copy]];
         }
     }
 }
 
-- (BOOL)respondWithDataForRequest:(AVAssetResourceLoadingRequest *)loadingRequest andTempVideoData:(NSData * _Nullable)tempVideoData{
+- (BOOL)respondWithDataForRequest:(AVAssetResourceLoadingRequest *)loadingRequest andTempVideoData:(NSData * _Nullable)tempVideoData {
     
     // Thanks for @DrunkenMouse(http://www.jianshu.com/users/5d853d21f7da/latest_articles) submmit a bug that my mistake of calculate "endOffset".
     // Thanks for Nick Xu Mark.
@@ -126,9 +132,11 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
     AVAssetResourceLoadingDataRequest *dataRequest = loadingRequest.dataRequest;
     
     NSUInteger startOffset = (NSUInteger)dataRequest.requestedOffset;
-    if (dataRequest.currentOffset!=0) {
+    
+    if (dataRequest.currentOffset != 0) {
         startOffset = (NSUInteger)dataRequest.currentOffset;
     }
+    
     startOffset = MAX(0, startOffset);
     
     // Don't have any data at all for this reques
@@ -136,11 +144,13 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
         return NO;
     }
     
-    NSUInteger unreadBytes = self.receivedSize - startOffset;
-    unreadBytes = MAX(0, unreadBytes);
+    NSUInteger unreadBytes = MAX(0, self.receivedSize - startOffset);;
+    
     NSUInteger numberOfBytesToRespondWith = MIN((NSUInteger)dataRequest.requestedLength, unreadBytes);
+    
     NSRange respondRange = NSMakeRange(startOffset, numberOfBytesToRespondWith);
-    if (tempVideoData.length>=numberOfBytesToRespondWith) {
+    
+    if (tempVideoData.length >= numberOfBytesToRespondWith) {
         [dataRequest respondWithData:[tempVideoData subdataWithRange:respondRange]];
     }
     
@@ -150,11 +160,12 @@ static NSString *JPVideoPlayerMimeType = @"video/mp4";
     if (_receivedSize >= endOffset) {
         return YES;
     }
+    
     // if the received data less than the requestLength.
     return NO;
 }
 
-- (void)fillInContentInformation:(AVAssetResourceLoadingContentInformationRequest * _Nonnull)contentInformationRequest{
+- (void)fillInContentInformation:(AVAssetResourceLoadingContentInformationRequest * _Nonnull)contentInformationRequest {
     if (contentInformationRequest) {
         NSString *mimetype = JPVideoPlayerMimeType;
         CFStringRef contentType = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, (__bridge CFStringRef _Nonnull)(mimetype), NULL);

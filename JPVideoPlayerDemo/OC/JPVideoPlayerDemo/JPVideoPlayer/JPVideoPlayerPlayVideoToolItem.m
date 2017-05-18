@@ -7,53 +7,89 @@
 //
 
 #import "JPVideoPlayerPlayVideoToolItem.h"
+#import "JPVideoPlayerPlayVideoTool.h"
 
 @interface JPVideoPlayerPlayVideoToolItem()
-
-
+@property(nonatomic, strong, nullable, readwrite) CALayer *backgroundLayer;
 @end
 
 @implementation JPVideoPlayerPlayVideoToolItem
 
--(void)stopPlayVideo{
+- (nonnull instancetype)initWithURL:(nonnull NSURL *)videoURL assetURL:(nullable NSURL *)assetURL playingKey:(nonnull NSString *)playingKey {
+    if (self = [super init]) {
+        _url = videoURL;
+        
+        NSURL *requestURL = assetURL ? : videoURL;
+        
+        AVURLAsset *videoURLAsset = [AVURLAsset URLAssetWithURL:requestURL options:nil];
+        
+        AVPlayerItem *playerItem = [AVPlayerItem playerItemWithAsset:videoURLAsset];
+        
+        _currentPlayerItem = playerItem;
+        
+        _videoURLAsset = videoURLAsset;
+        
+        _player = [AVPlayer playerWithPlayerItem:playerItem];
+        
+        _currentPlayerLayer = [AVPlayerLayer playerLayerWithPlayer:_player];
+        
+        _playingKey = playingKey;
+    }
     
+    return self;
+}
+
+- (nonnull instancetype)initWithURL:(nonnull NSURL *)videoURL playingKey:(nonnull NSString *)playingKey {
+    return [self initWithURL:videoURL assetURL:nil playingKey:playingKey];
+}
+
+
+- (void)stopPlayVideo {
     self.cancelled = YES;
-    
-    //    [self.unownShowView hideProgressView];
-    //    [self.unownShowView hideActivityIndicatorView];
+
+    if ([self.unownShowView respondsToSelector:@selector(videoItem:statusChange:)]) {
+        [self.unownShowView videoItem:self statusChange:JPPlaybackStatusRemoved];
+    }
     
     [self reset];
 }
 
--(void)pausePlayVideo{
+- (void)pausePlayVideo {
     [self.player pause];
+    if ([self.unownShowView respondsToSelector:@selector(videoItem:statusChange:)]) {
+        [self.unownShowView videoItem:self statusChange:JPPlaybackStatusPause];
+    }
 }
 
--(void)resumePlayVideo{
+- (void)resumePlayVideo {
     [self.player play];
+    if ([self.unownShowView respondsToSelector:@selector(videoItem:statusChange:)]) {
+        [self.unownShowView videoItem:self statusChange:JPPlaybackStatusp];
+    }
 }
 
--(void)reset{
-//    // remove video layer from superlayer.
-//    if (self.backgroundLayer.superlayer) {
-//        [self.currentPlayerLayer removeFromSuperlayer];
-//        [self.backgroundLayer removeFromSuperlayer];
-//    }
-//    
-//    // remove observe.
-//    JPVideoPlayerPlayVideoTool *tool = [JPVideoPlayerPlayVideoTool sharedTool];
-//    [_currentPlayerItem removeObserver:tool forKeyPath:@"status"];
-//    [_currentPlayerItem removeObserver:tool forKeyPath:@"loadedTimeRanges"];
-//    
-//    // remove player
-//    [self.player pause];
-//    [self.player cancelPendingPrerolls];
-//    self.player = nil;
-//    [self.videoURLAsset.resourceLoader setDelegate:nil queue:dispatch_get_main_queue()];
-//    self.currentPlayerItem = nil;
-//    self.currentPlayerLayer = nil;
-//    self.videoURLAsset = nil;
-    self.resourceLoader = nil;
+- (void)reset {
+    // remove video layer from superlayer.
+    if (self.backgroundLayer.superlayer) {
+        [self.currentPlayerLayer removeFromSuperlayer];
+        [self.backgroundLayer removeFromSuperlayer];
+    }
+
+    // remove observe.
+    JPVideoPlayerPlayVideoTool *tool = [JPVideoPlayerPlayVideoTool sharedTool];
+    [_currentPlayerItem removeObserver:tool forKeyPath:@"status"];
+    [_currentPlayerItem removeObserver:tool forKeyPath:@"loadedTimeRanges"];
+
+    // remove player
+    [self.player pause];
+    [self.player cancelPendingPrerolls];
+    
+    _player = nil;
+    [self.videoURLAsset.resourceLoader setDelegate:nil queue:dispatch_get_main_queue()];
+    _currentPlayerItem = nil;
+    _currentPlayerLayer = nil;
+    _videoURLAsset = nil;
+    _resourceLoader = nil;
 }
 
 -(CALayer *)backgroundLayer{
