@@ -235,8 +235,7 @@ typedef NSMutableDictionary<NSString *, id> JPCallbacksDictionary;
         dispatch_main_async_safe(^{
             [[NSNotificationCenter defaultCenter] postNotificationName:JPVideoPlayerDownloadReceiveResponseNotification object:self];
         });
-    }
-    else {
+    } else {
         NSUInteger code = ((NSHTTPURLResponse *)response).statusCode;
         
         // This is the case when server returns '304 Not Modified'. It means that remote video is not changed.

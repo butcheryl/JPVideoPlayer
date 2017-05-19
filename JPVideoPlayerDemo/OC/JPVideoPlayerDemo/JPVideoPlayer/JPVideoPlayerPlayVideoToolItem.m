@@ -8,6 +8,7 @@
 
 #import "JPVideoPlayerPlayVideoToolItem.h"
 #import "JPVideoPlayerPlayVideoTool.h"
+#import "JPVideoPlayerCompat.h"
 
 @interface JPVideoPlayerPlayVideoToolItem()
 @property(nonatomic, strong, nullable, readwrite) CALayer *backgroundLayer;
@@ -22,6 +23,12 @@
         NSURL *requestURL = assetURL ? : videoURL;
         
         AVURLAsset *videoURLAsset = [AVURLAsset URLAssetWithURL:requestURL options:nil];
+        
+        if (assetURL) {
+            _resourceLoader = [[JPVideoPlayerResourceLoader alloc] init];
+            
+            [videoURLAsset.resourceLoader setDelegate:_resourceLoader queue:dispatch_get_main_queue()];
+        }
         
         AVPlayerItem *playerItem = [AVPlayerItem playerItemWithAsset:videoURLAsset];
         
@@ -47,24 +54,20 @@
 - (void)stopPlayVideo {
     self.cancelled = YES;
 
-    if ([self.unownShowView respondsToSelector:@selector(videoItem:statusChange:)]) {
-        [self.unownShowView videoItem:self statusChange:JPPlaybackStatusRemoved];
-    }
+    self.status = JPPlaybackStatusRemoved;
     
     [self reset];
 }
 
 - (void)pausePlayVideo {
-    if ([self.unownShowView respondsToSelector:@selector(videoItem:statusChange:)]) {
-        [self.unownShowView videoItem:self statusChange:JPPlaybackStatusPause];
-    }
+    self.status = JPPlaybackStatusPause;
+    
     [self.player pause];
 }
 
 - (void)resumePlayVideo {
-    if ([self.unownShowView respondsToSelector:@selector(videoItem:statusChange:)]) {
-        [self.unownShowView videoItem:self statusChange:JPPlaybackStatusResume];
-    }
+    self.status = JPPlaybackStatusResume;
+    
     [self.player play];
 }
 
@@ -98,6 +101,21 @@
         _backgroundLayer.backgroundColor = [UIColor blackColor].CGColor;
     }
     return _backgroundLayer;
+}
+
+- (void)setStatus:(JPPlaybackStatus)status {
+    
+    if (status != _status) {
+        if ([self.unownShowView respondsToSelector:@selector(videoItem:statusChange:)]) {
+            dispatch_main_async_safe(^{
+                [self.unownShowView videoItem:self statusChange:status];
+            });
+        }
+    }
+    
+    [self willChangeValueForKey:@"status"];
+    _status = status;
+    [self didChangeValueForKey:@"status"];
 }
 
 @end

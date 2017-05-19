@@ -12,9 +12,9 @@
 @class JPVideoPlayerPlayVideoToolItem;
 
 typedef NS_ENUM(NSUInteger, JPPlaybackStatus) {
-    
+    JPPlaybackStatusUnknow,
     JPPlaybackStatusPreLoading,
-    JPPlaybackStatusBegan,
+    JPPlaybackStatusPlaying,
     JPPlaybackStatusLoading,
     JPPlaybackStatusPause,
     JPPlaybackStatusResume,
@@ -24,7 +24,7 @@ typedef NS_ENUM(NSUInteger, JPPlaybackStatus) {
 };
 
 // 本地视频/缓存视频 播放成功
-// JPPlaybackStatusBegan -> ...
+// JPPlaybackStatusPlaying -> ...
 
 // 预加载未完成时, 从屏幕上移除
 // JPPlaybackStatusPreLoading -> JPPlaybackStatusRemoved
@@ -33,22 +33,22 @@ typedef NS_ENUM(NSUInteger, JPPlaybackStatus) {
 // JPPlaybackStatusPreLoading -> JPPlaybackStatusError
 
 // 预加载成功, 播放时从屏幕移除
-// JPPlaybackStatusPreLoading -> JPPlaybackStatusBegan -> JPPlaybackStatusRemoved
+// JPPlaybackStatusPreLoading -> JPPlaybackStatusPlaying -> JPPlaybackStatusRemoved
 
 // 预加载成功，所有缓存播放完，加载失败
-// JPPlaybackStatusPreLoading -> JPPlaybackStatusBegan -> JPPlaybackStatusLoading -> JPPlaybackStatusError
+// JPPlaybackStatusPreLoading -> JPPlaybackStatusPlaying -> JPPlaybackStatusLoading -> JPPlaybackStatusError
 
 // 预加载成功, 播放成功, 从屏幕上移除
-// JPPlaybackStatusPreLoading -> JPPlaybackStatusBegan -> ... -> JPPlaybackStatusRemoved
+// JPPlaybackStatusPreLoading -> JPPlaybackStatusPlaying -> ... -> JPPlaybackStatusRemoved
 
 // 预加载成功, 播放成功，重复播放
-// JPPlaybackStatusPreLoading -> JPPlaybackStatusBegan -> ...
+// JPPlaybackStatusPreLoading -> JPPlaybackStatusPlaying -> ...
 
 // 预加载成功, 播放一个缓冲段，等待加载，继续播放 .. 播放成功
-// JPPlaybackStatusPreLoading -> JPPlaybackStatusBegan -> JPPlaybackStatusLoading -> JPPlaybackStatusResume -> ...
+// JPPlaybackStatusPreLoading -> JPPlaybackStatusPlaying -> JPPlaybackStatusLoading -> JPPlaybackStatusResume -> ...
 
 // 预加载成功，播放第一个缓冲段，暂停，继续播放
-// JPPlaybackStatusPreLoading -> JPPlaybackStatusBegan -> JPPlaybackStatusPause -> JPPlaybackStatusResume -> ...
+// JPPlaybackStatusPreLoading -> JPPlaybackStatusPlaying -> JPPlaybackStatusPause -> JPPlaybackStatusResume -> ...
 
 @protocol JPPlaybackControlsProtocol <NSObject>
 @optional

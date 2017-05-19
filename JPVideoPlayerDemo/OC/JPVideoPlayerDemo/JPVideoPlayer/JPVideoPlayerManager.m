@@ -139,7 +139,7 @@
             
         // Save received data to disk.
         JPVideoPlayerDownloaderProgressBlock handleProgressBlock = ^(NSData * _Nullable data, NSInteger receivedSize, NSInteger expectedSize, NSString *_Nullable tempVideoCachedPath, NSURL * _Nullable targetURL){
-            
+
             cacheToken = [strongSelf.videoCache storeVideoData:data expectedSize:expectedSize forKey:key completion:^(NSUInteger storedSize, NSError * _Nullable error, NSString * _Nullable fullVideoCachePath) {
                 if (!error) {
                     if (!fullVideoCachePath) {
@@ -168,14 +168,14 @@
                         [self callCompletionBlockForOperation:operation completion:completedBlock videoPath:fullVideoCachePath error:nil cacheType:JPVideoPlayerCacheTypeNone url:url];
                         [self safelyRemoveOperationFromRunning:operation];
                     }
-                }
-                else {
+                } else {
                     // some error happens.
                     [self callCompletionBlockForOperation:operation completion:completedBlock videoPath:nil error:error cacheType:JPVideoPlayerCacheTypeNone url:url];
                     
                     [self safelyRemoveOperationFromRunning:operation];
                 }
             }];
+
         };
             
         // delete all temporary first, then download video from web.
@@ -186,11 +186,16 @@
             JPVideoPlayerDownloadToken *subOperationToken =
             
             [strongSelf.videoDownloader downloadVideoWithURL:url options:downloaderOptions progress:handleProgressBlock completed:^(NSError * _Nullable error) {
+                
                 __strong typeof(_weakSelf) _strongSelf = _weakSelf;
                 
                 [_strongSelf callCompletionBlockForOperation:operation completion:completedBlock videoPath:nil error:error cacheType:JPVideoPlayerCacheTypeNone url:url];
                
                 [_strongSelf safelyRemoveOperationFromRunning:operation];
+                
+                if ([showView respondsToSelector:@selector(videoItem:statusChange:)]) {
+                    [showView videoItem:nil statusChange:JPPlaybackStatusError];
+                }
             }];
             
             __weak typeof(operation) weakOperation = operation;
@@ -294,6 +299,10 @@
     dispatch_main_async_safe(^{
         if (operation && !operation.isCancelled && completionBlock) {
             completionBlock(videoPath, error, cacheType, url);
+        }
+        
+        if (error) {
+            [JPVideoPlayerPlayVideoTool sharedTool].currentPlayVideoItem.status = JPPlaybackStatusError;
         }
     });
 }

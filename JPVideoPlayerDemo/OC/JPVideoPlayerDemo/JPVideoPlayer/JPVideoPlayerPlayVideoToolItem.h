@@ -14,6 +14,8 @@
 
 @interface JPVideoPlayerPlayVideoToolItem : NSObject
 
+@property (nonatomic, assign) JPPlaybackStatus status;
+
 /**
  * The playing URL
  */

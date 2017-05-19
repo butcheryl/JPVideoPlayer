@@ -123,21 +123,13 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
         return nil;
     }
     
-    // Re-create all all configuration agian.
-    // Make the `resourceLoader` become the delegate of 'videoURLAsset', and provide data to the player.
     NSString *playingKey = [[JPVideoPlayerManager sharedManager]cacheKeyForURL:url];
-    
-    JPVideoPlayerResourceLoader *resourceLoader = [[JPVideoPlayerResourceLoader alloc] init];
     
     JPVideoPlayerPlayVideoToolItem *item = [[JPVideoPlayerPlayVideoToolItem alloc] initWithURL:url
                                                                                       assetURL:self.handleVideoURL
                                                                                     playingKey:playingKey];
     
     item.unownShowView = showView;
-    
-    item.resourceLoader = resourceLoader;
-    
-    [item.videoURLAsset.resourceLoader setDelegate:resourceLoader queue:dispatch_get_main_queue()];
     
     [item.currentPlayerItem addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:nil];
     
@@ -223,7 +215,6 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appDidEnterPlayGround) name:UIApplicationDidBecomeActiveNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerItemDidPlayToEnd:) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appReceivedMemoryWarning) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(startDownload) name:JPVideoPlayerDownloadStartNotification object:nil];
 }
 
 - (void)appReceivedMemoryWarning{
@@ -236,12 +227,6 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
 
 - (void)appDidEnterPlayGround{
     [self.currentPlayVideoItem resumePlayVideo];
-}
-
-- (void)startDownload {
-    if ([self.currentPlayVideoItem.unownShowView respondsToSelector:@selector(videoItem:statusChange:)]) {
-        [self.currentPlayVideoItem.unownShowView videoItem:_currentPlayVideoItem statusChange:JPPlaybackStatusLoading];
-    }
 }
 
 - (CGFloat)preLoadDuration:(CGFloat)totalDuration {
@@ -291,7 +276,9 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context{
     if ([keyPath isEqualToString:@"status"]) {
         AVPlayerItem *playerItem = (AVPlayerItem *)object;
+        
         AVPlayerItemStatus status = playerItem.status;
+        
         switch (status) {
             case AVPlayerItemStatusUnknown:
                 break;
@@ -310,15 +297,11 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
                 [self.currentPlayVideoItem.unownShowView.layer addSublayer:self.currentPlayVideoItem.backgroundLayer];
                 
                 if (preLoadDuration > 0) {
-                    if ([self.currentPlayVideoItem.unownShowView respondsToSelector:@selector(videoItem:statusChange:)]) {
-                        [self.currentPlayVideoItem.unownShowView videoItem:_currentPlayVideoItem statusChange:JPPlaybackStatusPreLoading];
-                    }
+                    self.currentPlayVideoItem.status = JPPlaybackStatusPreLoading;
                 } else {
                     [self.currentPlayVideoItem.player play];
                     
-                    if ([self.currentPlayVideoItem.unownShowView respondsToSelector:@selector(videoItem:statusChange:)]) {
-                        [self.currentPlayVideoItem.unownShowView videoItem:_currentPlayVideoItem statusChange:JPPlaybackStatusBegan];
-                    }
+                    self.currentPlayVideoItem.status = JPPlaybackStatusPlaying;
                 }
             }
                 break;
@@ -327,25 +310,57 @@ static NSString *JPVideoPlayerURL = @"www.newpan.com";
                     self.currentPlayVideoItem.error([NSError errorWithDomain:@"Some errors happen on player" code:0 userInfo:nil]);
                 }
                 
-                if ([self.currentPlayVideoItem.unownShowView respondsToSelector:@selector(videoItem:statusChange:)]) {
-                    [self.currentPlayVideoItem.unownShowView videoItem:_currentPlayVideoItem statusChange:JPPlaybackStatusError];
-                }
+                self.currentPlayVideoItem.status = JPPlaybackStatusError;
             }
                 break;
         }
     } else if ([keyPath isEqualToString:@"loadedTimeRanges"]) {
-        // 如果当前播放的时间没有增加, 则说明视频卡住了, 增加了就说明开始播放了.
         
-        NSTimeInterval currentTime = CMTimeGetSeconds(self.currentPlayVideoItem.player.currentTime);
+        NSArray *array = self.currentPlayVideoItem.currentPlayerItem.loadedTimeRanges;
         
-        if (currentTime != 0 && currentTime > self.currentPlayVideoItem.lastTime) {
-            self.currentPlayVideoItem.lastTime = currentTime;
-            if ([self.currentPlayVideoItem.unownShowView respondsToSelector:@selector(videoItem:statusChange:)]) {
-                [self.currentPlayVideoItem.unownShowView videoItem:_currentPlayVideoItem statusChange:JPPlaybackStatusResume];
+        CMTimeRange timeRange = [array.firstObject CMTimeRangeValue]; //本次缓冲时间范围
+        
+        CGFloat startSeconds = CMTimeGetSeconds(timeRange.start);
+        
+        CGFloat durationSeconds = CMTimeGetSeconds(timeRange.duration);
+        
+        NSTimeInterval totalBuffer = startSeconds + durationSeconds; //缓冲总长度
+        
+        CGFloat preDuration = [self preLoadDuration:CMTimeGetSeconds(self.currentPlayVideoItem.currentPlayerItem.duration)];
+        
+        
+        if (preDuration > 0) {
+            if (totalBuffer < preDuration) {
+                // 预加载过程中
+                if (self.currentPlayVideoItem.status != JPPlaybackStatusPreLoading) {
+                    self.currentPlayVideoItem.status = JPPlaybackStatusPreLoading;
+                }
+                
+                if ([self.currentPlayVideoItem.unownShowView respondsToSelector:@selector(videoItem:preLoadProgress:)]) {
+                    [self.currentPlayVideoItem.unownShowView videoItem:_currentPlayVideoItem preLoadProgress:MIN(totalBuffer / preDuration, 1)];
+                }
+                
+            } else if (self.currentPlayVideoItem.status == JPPlaybackStatusPreLoading) {
+                
+                if ([self.currentPlayVideoItem.unownShowView respondsToSelector:@selector(videoItem:preLoadProgress:)]) {
+                    [self.currentPlayVideoItem.unownShowView videoItem:_currentPlayVideoItem preLoadProgress:1.0];
+                }
+                
+                [self.currentPlayVideoItem.player play];
+                
+                self.currentPlayVideoItem.status = JPPlaybackStatusPlaying;
             }
-        } else {
-            if ([self.currentPlayVideoItem.unownShowView respondsToSelector:@selector(videoItem:statusChange:)]) {
-                [self.currentPlayVideoItem.unownShowView videoItem:_currentPlayVideoItem statusChange:JPPlaybackStatusLoading];
+        }
+        
+        if (self.currentPlayVideoItem.status != JPPlaybackStatusPreLoading) {
+            
+            NSTimeInterval currentTime = CMTimeGetSeconds(self.currentPlayVideoItem.player.currentTime);
+            
+            if (currentTime != 0 && currentTime > self.currentPlayVideoItem.lastTime) {
+                self.currentPlayVideoItem.lastTime = currentTime;
+                self.currentPlayVideoItem.status = JPPlaybackStatusResume;
+            } else {
+                self.currentPlayVideoItem.status = JPPlaybackStatusLoading;
             }
         }
     }
