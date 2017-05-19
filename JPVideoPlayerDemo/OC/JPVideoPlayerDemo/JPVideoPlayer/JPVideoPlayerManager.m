@@ -252,8 +252,6 @@
     return nil;
 }
 
-
-
 - (void)cancelAllDownloads{
     [self.videoDownloader cancelAllDownloads];
 }

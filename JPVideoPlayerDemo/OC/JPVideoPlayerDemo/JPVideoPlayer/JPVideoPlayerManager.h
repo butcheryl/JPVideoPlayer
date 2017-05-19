@@ -63,6 +63,7 @@
  *
  * @return Returns an NSObject conforming to JPVideoPlayerOperation. Should be an instance of JPVideoPlayerDownloaderOperation.
  */
+
 - (nullable id <JPVideoPlayerOperation>)loadVideoWithURL:(nonnull NSURL *)url
                                               showOnView:(nullable UIView<JPPlaybackControlsProtocol> *)showView
                                                  options:(JPVideoPlayerOptions)options

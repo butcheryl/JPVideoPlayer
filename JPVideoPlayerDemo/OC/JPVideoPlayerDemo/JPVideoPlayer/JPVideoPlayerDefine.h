@@ -31,16 +31,6 @@ typedef NS_OPTIONS(NSUInteger, JPVideoPlayerOptions) {
     JPVideoPlayerAllowInvalidSSLCertificates = 1 << 2,
     
     /**
-     * Use this flag to display progress view when play video from web.
-     */
-    JPVideoPlayerShowProgressView = 1 << 3,
-    
-    /**
-     * Use this flag to display activity indicator view when video player is buffering.
-     */
-    JPVideoPlayerShowActivityIndicatorView = 1 << 4,
-    
-    /**
      * Playing video muted.
      */
     JPVideoPlayerMutedPlay = 1 << 5,
